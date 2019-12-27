@@ -1,68 +1,31 @@
-#include <coelum/main.h>
-#include <coelum/scene.h>
-#include <coelum/theatre.h>
-#include <coelum/constants.h>
-#include <coelum/scene.h>
-#include <coelum/actor.h>
+#include "include/chunk.h"
+#include "include/block_type.h"
+#include <coelum/current.h>
+#include <coelum/textures.h>
 #include <coelum/draw_utils.h>
-#include <coelum/camera.h>
-#include <coelum/input.h>
-#include <coelum/actor_light.h>
 #include <glad/glad.h>
+#include <stdlib.h>
+#include <sys/param.h>
 
 
-extern theatre_T* THEATRE;
-extern mouse_state_T* MOUSE_STATE;
-extern keyboard_state_T* KEYBOARD_STATE;
+#define CHUNK_SIZE 8
+
+extern texture_T* TEXTURE_COBBLE;
 extern unsigned int SHADER_TEXTURED_SHADED;
 
-texture_T* texture;
-
-float distance;
-
-
-void draw_grid(state_T* state, float x, float y, float z)
+chunk_T* init_chunk()
 {
-    float unit = 1;
-    float length = unit * 200;
+    chunk_T* chunk = calloc(1, sizeof(struct CHUNK_STRUCT));
 
-    // x
-    for (int i = 0; i < length; i++)
-    {
-        draw_line(
-            x,
-            y,
-            z + i,
-            length,
-            0,
-            i,
-            255.0f,
-            0,
-            0,
-            state
-        );
-    }
+    for (int y = 0; y < CHUNK_SIZE; y++)
+        for (int x = 0; x < CHUNK_SIZE; x++)
+            for (int z = 0; z < CHUNK_SIZE; z++)
+                chunk->blocks[x][y][z] = BLOCK_COBBLE;
 
-    // z
-    for (int i = 0; i < length; i++)
-    {
-        draw_line(
-            x + i,
-            y,
-            z,
-            i,
-            0,
-            length,
-            0,
-            0,
-            255.0f,
-            state
-        );
-    }
-
+    return chunk;
 }
 
-void draw_cube(state_T* state, float x, float y, float z)
+void draw_cube(state_T* state, texture_T* texture, float x, float y, float z)
 {
     float width = 1.0f;
     float height = 1.0f;
@@ -152,16 +115,16 @@ void draw_cube(state_T* state, float x, float y, float z)
         width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,    1.0f, 0.0f, 0.0f,    // top left
 
         // positions            // colors                                // texture c    oords
-        0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, -1.0f, 0.0f,   // top right
-        0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, -1.0f, 0.0f,   // bottom right
-        width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,   0.0f, -1.0f, 0.0f,   // bottom left
-        width,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, -1.0f, 0.0f,    // top left
+        0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 1.0f, 0.0f,   // top right
+        0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 1.0f, 0.0f,   // bottom right
+        width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,   0.0f, 1.0f, 0.0f,   // bottom left
+        width,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 1.0f, 0.0f,    // top left
 
         // positions            // colors                                // texture c    oords
-        0.0f,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,    0.0f, 1.0f, 0.0f,   // top right
-        0.0f,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   // bottom right
-        width,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,  0.0f, 1.0f, 0.0f,   // bottom left
-        width,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,   0.0f, 1.0f, 0.0f,    // top left
+        0.0f,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,    0.0f, -1.0f, 0.0f,   // top right
+        0.0f,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,   0.0f, -1.0f, 0.0f,   // bottom right
+        width,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,  0.0f, -1.0f, 0.0f,   // bottom left
+        width,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,   0.0f, -1.0f, 0.0f,    // top left
     }; 
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -189,93 +152,42 @@ void draw_cube(state_T* state, float x, float y, float z)
 
     glDrawElements(GL_TRIANGLES, 6*6, GL_UNSIGNED_INT, 0);
 
-
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glBindVertexArray(0);
 }
 
-void custom_scene_draw(scene_T* scene)
+void chunk_draw(chunk_T* chunk)
 {
-    state_T* state = (state_T*) scene;
-    
+    state_T* state = get_current_state();
 
-    camera_bind(state->camera);
-    
-    for (int i = 0; i < 16; i++)
-        draw_cube(state, i, 0, 0);
-    draw_grid(state, 0, 0, 0);
+    // TODO: Calculate and make all cube draws into one single call.
 
-    camera_unbind(state->camera);
-}
-
-void custom_scene_tick(scene_T* scene)
-{
-    state_T* state = (state_T*) scene;
-    
-
-
-    if (KEYBOARD_STATE->keys[GLFW_KEY_W])
+    for (int y = 0; y < CHUNK_SIZE; y++)
     {
-        state->camera->x += cos(glm_rad(state->camera->ry + 90));
-        state->camera->z -= sin(glm_rad(state->camera->ry + 90));
-        distance += 0.3f;
+        for (int x = 0; x < CHUNK_SIZE; x++)
+        {
+            for (int z = 0; z < CHUNK_SIZE; z++)
+            {
+                texture_T* texture = (void*)0;
+
+                if (chunk->blocks[x][y][z] == BLOCK_COBBLE)
+                    texture = TEXTURE_COBBLE;
+
+                if (x != 0 && y != 0 && z != 0 && x != CHUNK_SIZE - 1 && y != CHUNK_SIZE - 1 && z != CHUNK_SIZE - 1)
+                if (
+                   chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR &&
+                   chunk->blocks[MIN(CHUNK_SIZE - 1, x+1)][y][z] != BLOCK_AIR &&
+                   chunk->blocks[x][MIN(0, y-1)][z] != BLOCK_AIR &&
+                   chunk->blocks[x][MAX(CHUNK_SIZE - 1, y+1)][z] != BLOCK_AIR &&
+                   chunk->blocks[x][y][MIN(0, z-1)] != BLOCK_AIR &&
+                   chunk->blocks[x][y][MAX(CHUNK_SIZE - 1, z+1)] != BLOCK_AIR
+                )
+                    continue;
+
+                if (texture != (void*)0)
+                    draw_cube(state, texture, x, y, z);
+            }
+        }
     }
-
-    if (KEYBOARD_STATE->keys[GLFW_KEY_S])
-    {
-        state->camera->x -= cos(glm_rad(state->camera->ry + 90));
-        state->camera->z += sin(glm_rad(state->camera->ry + 90));
-    }
-
-    state->camera->y = 5 - (cos(distance) * 0.5f);
-
-    state->camera->offset_x = state->camera->x;
-    state->camera->offset_y = state->camera->y;
-    state->camera->offset_z = state->camera->z;
-    state->camera->rx += MOUSE_STATE->dy * 0.25f;
-    state->camera->ry += MOUSE_STATE->dx * 0.25f;
-    //state->camera->ry = cos(T) * 30;
 }
-
-scene_T* init_scene_main()
-{
-    distance = 0.0f;
-    // creating a scene                          tick        draw     (2 dimensions)
-    scene_T* s = scene_constructor(init_scene(), custom_scene_tick, custom_scene_draw, 3);
-    s->bg_r = 154;
-    s->bg_g = 55;
-    s->bg_g = 200;
-
-    state_T* state = (state_T*) s;
-
-    state->lighting_enabled = 1;
-    
-    state->camera->y = 5;
-    state->camera->z = 1;
-    state->camera->x = 1;
-    state->camera->ry = 0;
-
-    actor_light_T* light = init_actor_light(
-        0.0f, 1.0f, 2.0f,
-        13.0f        
-    );
-
-    dynamic_list_append(((state_T*)s)->actors, light);
-    
-
-    return s;
-} 
-
-int main(int argc, char* argv[])
-{
-    coelum_init();
-
-    texture = get_texture("cobble.png", GL_RGB);
-
-    MOUSE_STATE->input_mode = GLFW_CURSOR_DISABLED;
-
-    scene_manager_register_scene(THEATRE->scene_manager, (scene_T*) init_scene_main());
-
-    return coelum_main(argc, argv);
- }
