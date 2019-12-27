@@ -29,41 +29,35 @@ void draw_grid(state_T* state, float x, float y, float z)
     // x
     for (int i = 0; i < length; i++)
     {
-        if (i % 2 == 0)
-        {
-            draw_line(
-                x,
-                y,
-                z + i,
-                length,
-                0,
-                i,
-                255.0f,
-                0,
-                0,
-                state
-            );
-        }
+        draw_line(
+            x,
+            y,
+            z + i,
+            length,
+            0,
+            i,
+            255.0f,
+            0,
+            0,
+            state
+        );
     }
 
     // z
     for (int i = 0; i < length; i++)
     {
-        if (i % 2 == 0)
-        {
-            draw_line(
-                x + i,
-                y,
-                z,
-                i,
-                0,
-                length,
-                0,
-                0,
-                255.0f,
-                state
-            );
-        }
+        draw_line(
+            x + i,
+            y,
+            z,
+            i,
+            0,
+            length,
+            0,
+            0,
+            255.0f,
+            state
+        );
     }
 
 }
@@ -209,7 +203,7 @@ void custom_scene_draw(scene_T* scene)
     camera_bind(state->camera);
     
     for (int i = 0; i < 16; i++)
-        draw_cube(state, i, 2, 0);
+        draw_cube(state, i, 0, 0);
     draw_grid(state, 0, 0, 0);
 
     camera_unbind(state->camera);
