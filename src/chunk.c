@@ -1,8 +1,10 @@
 #include "include/chunk.h"
 #include "include/block_type.h"
+#include "include/draw.h"
 #include <coelum/current.h>
 #include <coelum/textures.h>
 #include <coelum/draw_utils.h>
+#include <coelum/utils.h>
 #include <math.h>
 #include <glad/glad.h>
 #include <stdlib.h>
@@ -12,160 +14,15 @@
 #define CHUNK_SIZE 16
 
 extern texture_T* TEXTURE_COBBLE;
-extern unsigned int SHADER_TEXTURED_SHADED;
 
-chunk_T* init_chunk()
+
+static void generate_vertices(chunk_T* chunk)
 {
-    chunk_T* chunk = calloc(1, sizeof(struct CHUNK_STRUCT));
-
-    for (int y = 0; y < CHUNK_SIZE; y++)
-        for (int x = 0; x < CHUNK_SIZE; x++)
-            for (int z = 0; z < CHUNK_SIZE; z++)
-                chunk->blocks[x][y][z] = BLOCK_COBBLE;
-
-    return chunk;
-}
-
-void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, float* vertices, float vertices_size)
-{
-    float width = 1.0f;
-    float height = 1.0f;
-    float r = 255.0f;
-    float g = 255.0f;
-    float b = 255.0f;
-    float a = 1.0f;
-
-    int INDICES_DEFAULT [] =
-    {
-        // front
-        0, 1, 3,   // first triangle
-        1, 2, 3,    // second triangle
-        
-        // back
-        4, 5, 7,   // first triangle
-        5, 6, 7,    // second triangle
-
-        // left
-        8, 9, 11,   // first triangle
-        9, 10, 11,    // second triangle
-
-        // right
-        12, 13, 15,   // first triangle
-        13, 14, 15,    // second triangle
-
-        // bottom
-        16, 17, 19,   // first triangle
-        17, 18, 19,    // second triangle
-
-        // top
-        20, 21, 23,   // first triangle
-        21, 22, 23,    // second triangle
-    };
-
-    glBindVertexArray(state->VAO);
-    glUseProgram(SHADER_TEXTURED_SHADED);
-
-    glUniform1i(glGetUniformLocation(SHADER_TEXTURED_SHADED, "ourTexture"), 0); 
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture->renderable_texture);
-
-    send_projection_view_state(SHADER_TEXTURED_SHADED, state->camera->projection_view); 
-
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-
-    mat4 model =
-    {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    };
-
-    glm_translate(model, (vec3){x, y, z});
-    send_model_state(SHADER_TEXTURED_SHADED, model);
-
-    /*float VERTICES_TEXTURED[] =
-    {
-        // positions            // colors                                // texture coords
-        0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 0.0f, 1.0f,   // top right
-        width,  0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 0.0f, 1.0f,   // bottom right
-        width,  height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,     0.0f, 0.0f, 1.0f,   // bottom left
-        0.0f,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 0.0f, 1.0f,    // top left
-
-        // positions            // colors                                // texture c    oords
-        0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 0.0f, -1.0f,   // top right
-        width,  0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 0.0f, -1.0f,   // bottom right
-        width,  height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,     0.0f, 0.0f, -1.0f,   // bottom left
-        0.0f,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 0.0f, -1.0f,    // top left
-
-        // positions            // colors                                // texture c    oords
-        0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     -1.0f, 0.0f, 0.0f,   // top right
-        0.0f,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,   // bottom right
-        0.0f,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,    -1.0f, 0.0f, 0.0f,   // bottom left
-        0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,    -1.0f, 0.0f, 0.0f,    // top left
-
-        // positions            // colors                                // texture c    oords
-        width,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     1.0f, 0.0f, 0.0f,   // top right
-        width,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     1.0f, 0.0f, 0.0f,   // bottom right
-        width,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,    1.0f, 0.0f, 0.0f,   // bottom left
-        width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,    1.0f, 0.0f, 0.0f,    // top left
-
-        // positions            // colors                                // texture c    oords
-        0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 1.0f, 0.0f,   // top right
-        0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 1.0f, 0.0f,   // bottom right
-        width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,   0.0f, 1.0f, 0.0f,   // bottom left
-        width,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 1.0f, 0.0f,    // top left
-
-        // positions            // colors                                // texture c    oords
-        0.0f,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,    0.0f, -1.0f, 0.0f,   // top right
-        0.0f,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,   0.0f, -1.0f, 0.0f,   // bottom right
-        width,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,  0.0f, -1.0f, 0.0f,   // bottom left
-        width,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,   0.0f, -1.0f, 0.0f,    // top left
-    };*/
-    
-    float* VERTICES_TEXTURED = vertices; 
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(VERTICES_TEXTURED), VERTICES_TEXTURED, GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, vertices_size * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(INDICES_DEFAULT), INDICES_DEFAULT, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(3* sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // texcoords
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(7 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    // normal
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(8 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-
-    glUniform3fv(glGetUniformLocation(SHADER_TEXTURED_SHADED, "world_pos"), 1, (float[]){ x, y, z });
-
-    glDrawElements(GL_TRIANGLES, (6*6), GL_UNSIGNED_INT, 0);
-    //glDrawArrays(GL_TRIANGLES, 0, vertices_size);
-
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glBindVertexArray(0);
-}
-
-static float* generate_vertices(chunk_T* chunk)
-{
-    size_t vecs_size = 0;
-    float* vecs = (void*)0;
+    chunk->vertices_size = 0;
+    chunk->indices_size = 0;
+    chunk->vertices = (void*)0;
+    chunk->indices = (void*)0;
+    chunk->block_count = 0;
 
     for (int y = 0; y < CHUNK_SIZE; y++)
     {
@@ -173,7 +30,7 @@ static float* generate_vertices(chunk_T* chunk)
         {
             for (int z = 0; z < CHUNK_SIZE; z++)
             {
-                /*if (x != 0 && y != 0 && z != 0 && x != CHUNK_SIZE - 1 && y != CHUNK_SIZE - 1 && z != CHUNK_SIZE - 1)
+                if (x != 0 && y != 0 && z != 0 && x != CHUNK_SIZE - 1 && y != CHUNK_SIZE - 1 && z != CHUNK_SIZE - 1)
                 if (
                    chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR &&
                    chunk->blocks[MIN(CHUNK_SIZE - 1, x+1)][y][z] != BLOCK_AIR &&
@@ -182,7 +39,10 @@ static float* generate_vertices(chunk_T* chunk)
                    chunk->blocks[x][y][MIN(0, z-1)] != BLOCK_AIR &&
                    chunk->blocks[x][y][MAX(CHUNK_SIZE - 1, z+1)] != BLOCK_AIR
                 )
-                    continue;*/
+                    continue;
+
+                if (chunk->blocks[x][y][z] == BLOCK_AIR)
+                    continue;
 
                 float width = 1;
                 float height = 1;
@@ -191,7 +51,34 @@ static float* generate_vertices(chunk_T* chunk)
                 float b = 255;
                 float a  = 1;
 
-                float VERTICES_TEXTURED[] =
+                int indices [] =
+                {
+                    // front
+                    0, 1, 3,   // first triangle
+                    1, 2, 3,    // second triangle
+                    
+                    // back
+                    4, 5, 7,   // first triangle
+                    5, 6, 7,    // second triangle
+
+                    // left
+                    8, 9, 11,   // first triangle
+                    9, 10, 11,    // second triangle
+
+                    // right
+                    12, 13, 15,   // first triangle
+                    13, 14, 15,    // second triangle
+
+                    // bottom
+                    16, 17, 19,   // first triangle
+                    17, 18, 19,    // second triangle
+
+                    // top
+                    20, 21, 23,   // first triangle
+                    21, 22, 23,    // second triangle
+                };
+
+                float vertices[] =
                 {
                     // positions            // colors                                // texture coords
                     0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 0.0f, 1.0f,   // top right
@@ -235,8 +122,8 @@ static float* generate_vertices(chunk_T* chunk)
 
                 for (int i = 0; i < 12*24; i++)
                 {
-                    if (vecs == (void*)0)
-                        vecs = calloc(1, sizeof(float));
+                    if (chunk->vertices == (void*)0)
+                        chunk->vertices = calloc(1, sizeof(float));
 
                     if (xx >= 12)
                     {
@@ -244,25 +131,60 @@ static float* generate_vertices(chunk_T* chunk)
                         xx = 0;
                     }
 
-                    vecs_size += 1;
-                    vecs = realloc(vecs, vecs_size * sizeof(float));
-                    vecs[vecs_size-1] = VERTICES_TEXTURED[i];
+                    chunk->vertices_size += 1;
+                    chunk->vertices = realloc(chunk->vertices, chunk->vertices_size * sizeof(float));
+                    chunk->vertices[chunk->vertices_size-1] = vertices[i];
+
+                    if (xx == 0)
+                        chunk->vertices[chunk->vertices_size-1] += (float)x;
+                    
+                    if (xx == 1)
+                        chunk->vertices[chunk->vertices_size-1] += (float)y;
+
+                    if (xx == 2)
+                        chunk->vertices[chunk->vertices_size-1] += (float)z;
+
+                    xx += 1;
                 }
 
-                break;
+                for (int i = 0; i < 6*6; i++)
+                {
+                    chunk->indices_size += 1;
+                    chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
+                    chunk->indices[chunk->indices_size-1] = indices[i] + chunk->block_count;
+                }
+                
+                chunk->block_count += 24; // wait.... why?
             }
         }
     }
+}
 
-    printf("%d\n", (int)vecs_size);
+chunk_T* init_chunk(int x, int y, int z)
+{
+    chunk_T* chunk = calloc(1, sizeof(struct CHUNK_STRUCT));
+    chunk->vertices = (void*)0;
+    chunk->indices = (void*)0;
+    chunk->vertices_size = 0;
+    chunk->indices_size = 0;
+    chunk->x = x;
+    chunk->y = y;
+    chunk->z = z;
 
-    return vecs;
+    for (int y = 0; y < CHUNK_SIZE; y++)
+        for (int x = 0; x < CHUNK_SIZE; x++)
+            for (int z = 0; z < CHUNK_SIZE; z++)
+                chunk->blocks[x][y][z] = BLOCK_COBBLE;//random_int(0, 3) == 0 ? BLOCK_AIR : BLOCK_COBBLE;
+
+
+    generate_vertices(chunk);
+
+    return chunk;
 }
 
 void chunk_draw(chunk_T* chunk)
 {
     state_T* state = get_current_state();
-    float* vertices = generate_vertices(chunk);
 
     // TODO: Calculate and make all cube draws into one single call.
 
@@ -294,5 +216,16 @@ void chunk_draw(chunk_T* chunk)
         }
     }*/
 
-    draw_cube(state, TEXTURE_COBBLE, 0, 0, 0, vertices, 73728);
+    draw_cube(
+        state,
+        TEXTURE_COBBLE,
+        chunk->x * CHUNK_SIZE,
+        chunk->y * CHUNK_SIZE,
+        chunk->z * CHUNK_SIZE,
+        chunk->vertices,
+        chunk->vertices_size,
+        chunk->indices,
+        chunk->indices_size,
+        chunk->block_count
+    );
 }

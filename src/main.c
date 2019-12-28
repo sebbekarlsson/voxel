@@ -20,7 +20,10 @@ texture_T* TEXTURE_COBBLE;
 
 float distance;
 
-chunk_T* chunks[1][1][1];
+#define NR_CHUNKS 6
+
+chunk_T* chunks[NR_CHUNKS][1][NR_CHUNKS];
+
 
 
 void draw_grid(state_T* state, float x, float y, float z)
@@ -72,8 +75,8 @@ void custom_scene_draw(scene_T* scene)
     draw_grid(state, 0, 0, 0);
 
     for (int y = 0; y < 1; y++)
-        for (int x = 0; x < 1; x++)
-            for (int z = 0; z < 1; z++)
+        for (int x = 0; x < NR_CHUNKS; x++)
+            for (int z = 0; z < NR_CHUNKS; z++)
                 chunk_draw(chunks[x][y][z]);
 
 
@@ -83,21 +86,23 @@ void custom_scene_draw(scene_T* scene)
 void custom_scene_tick(scene_T* scene)
 {
     state_T* state = (state_T*) scene;
+
+    float wspeed = 0.2f;
     
     if (KEYBOARD_STATE->keys[GLFW_KEY_W])
     {
-        state->camera->x += cos(glm_rad(state->camera->ry + 90));
-        state->camera->z -= sin(glm_rad(state->camera->ry + 90));
+        state->camera->x += cos(glm_rad(state->camera->ry + 90)) * wspeed;
+        state->camera->z -= sin(glm_rad(state->camera->ry + 90)) * wspeed;
         distance += 0.3f;
     }
 
     if (KEYBOARD_STATE->keys[GLFW_KEY_S])
     {
-        state->camera->x -= cos(glm_rad(state->camera->ry + 90));
-        state->camera->z += sin(glm_rad(state->camera->ry + 90));
+        state->camera->x -= cos(glm_rad(state->camera->ry + 90)) * wspeed;
+        state->camera->z += sin(glm_rad(state->camera->ry + 90)) * wspeed;
     }
 
-    state->camera->y = 5 - (cos(distance) * 0.5f);
+    state->camera->y = 1 - (cos(distance) * 0.2f);
 
     state->camera->offset_x = state->camera->x;
     state->camera->offset_y = state->camera->y;
@@ -132,9 +137,9 @@ scene_T* init_scene_main()
     dynamic_list_append(((state_T*)s)->actors, light);
 
     for (int y = 0; y < 1; y++)
-        for (int x = 0; x < 1; x++)
-            for (int z = 0; z < 1; z++)
-                chunks[x][y][z] = init_chunk();
+        for (int x = 0; x < NR_CHUNKS; x++)
+            for (int z = 0; z < NR_CHUNKS; z++)
+                chunks[x][y][z] = init_chunk(x, y, z);
     
     return s;
 } 
