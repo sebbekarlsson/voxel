@@ -20,7 +20,7 @@ texture_T* TEXTURE_COBBLE;
 
 float distance;
 
-#define NR_CHUNKS 1
+#define NR_CHUNKS 4
 
 chunk_T* chunks[NR_CHUNKS][1][NR_CHUNKS];
 
@@ -87,7 +87,7 @@ void custom_scene_tick(scene_T* scene)
 {
     state_T* state = (state_T*) scene;
 
-    float wspeed = 0.2f;
+    float wspeed = 0.1f;
     
     if (KEYBOARD_STATE->keys[GLFW_KEY_W])
     {
@@ -102,7 +102,7 @@ void custom_scene_tick(scene_T* scene)
         state->camera->z += sin(glm_rad(state->camera->ry + 90)) * wspeed;
     }
 
-    state->camera->y = 1 - (cos(distance) * 0.2f);
+    state->camera->y = 17 - (cos(distance) * 0.1f);
 
     state->camera->offset_x = state->camera->x;
     state->camera->offset_y = state->camera->y;

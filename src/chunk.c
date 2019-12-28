@@ -32,7 +32,7 @@ static void generate_vertices(chunk_T* chunk)
         {
             for (int z = 0; z < CHUNK_SIZE; z++)
             {
-                /*if (x != 0 && y != 0 && z != 0 && x != CHUNK_SIZE - 1 && y != CHUNK_SIZE - 1 && z != CHUNK_SIZE - 1)
+                if (x != 0 && y != 0 && z != 0 && x != CHUNK_SIZE - 1 && y != CHUNK_SIZE - 1 && z != CHUNK_SIZE - 1)
                 if (
                    chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR &&
                    chunk->blocks[MIN(CHUNK_SIZE, x+1)][y][z] != BLOCK_AIR &&
@@ -44,7 +44,7 @@ static void generate_vertices(chunk_T* chunk)
                     continue;
 
                 if (chunk->blocks[x][y][z] == BLOCK_AIR)
-                    continue;*/
+                    continue;
 
                 float width = 1;
                 float height = 1;
@@ -114,7 +114,7 @@ static void generate_vertices(chunk_T* chunk)
 
                     if (faceid == 5)
                     {
-                        if (chunk->blocks[x][MIN(CHUNK_SIZE, y-1)][z] != BLOCK_AIR)
+                        if (chunk->blocks[x][MAX(0, y-1)][z] != BLOCK_AIR && y < CHUNK_SIZE - 1)
                         {
                             xx += 1;
                             continue;
@@ -122,7 +122,7 @@ static void generate_vertices(chunk_T* chunk)
                     }
                     if (faceid == 4 && y > 0 && y < CHUNK_SIZE - 1)
                     {
-                        if (chunk->blocks[x][MAX(0, y+1)][z] != BLOCK_AIR)
+                        if (chunk->blocks[x][MAX(0, y-1)][z] != BLOCK_AIR && chunk->blocks[x][MIN(CHUNK_SIZE, y+1)][z] != BLOCK_AIR)
                         {
                             xx += 1;
                             continue;
