@@ -119,7 +119,7 @@ void custom_scene_tick(scene_T* scene)
         state->camera->z += sin(glm_rad(state->camera->ry + 90)) * wspeed;
     }
 
-    state->camera->y = 17 - (cos(distance) * 0.1f);
+    state->camera->y = 18 - (cos(distance) * 0.1f);
 
     state->camera->offset_x = state->camera->x;
     state->camera->offset_y = state->camera->y;
@@ -145,6 +145,8 @@ scene_T* init_scene_main()
     state->camera->z = 1;
     state->camera->x = 1;
     state->camera->ry = 0;
+    state->camera->projection_view->fov = 90.0f;
+    projection_view_recalculate_projection(state->camera->projection_view);
 
     actor_light_T* light = init_actor_light(
         0.0f, 16.0f, 2.0f,
