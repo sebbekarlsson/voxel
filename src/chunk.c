@@ -24,59 +24,34 @@ static void generate_vertices(chunk_T* chunk)
     chunk->indices = (void*)0;
     chunk->block_count = 0;
 
+    int icount = 0;
+
     for (int y = 0; y < CHUNK_SIZE; y++)
     {
         for (int x = 0; x < CHUNK_SIZE; x++)
         {
             for (int z = 0; z < CHUNK_SIZE; z++)
             {
-                if (x != 0 && y != 0 && z != 0 && x != CHUNK_SIZE - 1 && y != CHUNK_SIZE - 1 && z != CHUNK_SIZE - 1)
+                /*if (x != 0 && y != 0 && z != 0 && x != CHUNK_SIZE - 1 && y != CHUNK_SIZE - 1 && z != CHUNK_SIZE - 1)
                 if (
                    chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR &&
-                   chunk->blocks[MIN(CHUNK_SIZE - 1, x+1)][y][z] != BLOCK_AIR &&
-                   chunk->blocks[x][MIN(0, y-1)][z] != BLOCK_AIR &&
-                   chunk->blocks[x][MAX(CHUNK_SIZE - 1, y+1)][z] != BLOCK_AIR &&
-                   chunk->blocks[x][y][MIN(0, z-1)] != BLOCK_AIR &&
-                   chunk->blocks[x][y][MAX(CHUNK_SIZE - 1, z+1)] != BLOCK_AIR
+                   chunk->blocks[MIN(CHUNK_SIZE, x+1)][y][z] != BLOCK_AIR &&
+                   chunk->blocks[x][MAX(0, y-1)][z] != BLOCK_AIR &&
+                   chunk->blocks[x][MIN(CHUNK_SIZE, y+1)][z] != BLOCK_AIR &&
+                   chunk->blocks[x][y][MAX(0, z-1)] != BLOCK_AIR &&
+                   chunk->blocks[x][y][MIN(CHUNK_SIZE, z+1)] != BLOCK_AIR
                 )
                     continue;
 
                 if (chunk->blocks[x][y][z] == BLOCK_AIR)
-                    continue;
+                    continue;*/
 
                 float width = 1;
                 float height = 1;
                 float r = 255;
                 float g = 255;
                 float b = 255;
-                float a  = 1;
-
-                int indices [] =
-                {
-                    // front
-                    0, 1, 3,   // first triangle
-                    1, 2, 3,    // second triangle
-                    
-                    // back
-                    4, 5, 7,   // first triangle
-                    5, 6, 7,    // second triangle
-
-                    // left
-                    8, 9, 11,   // first triangle
-                    9, 10, 11,    // second triangle
-
-                    // right
-                    12, 13, 15,   // first triangle
-                    13, 14, 15,    // second triangle
-
-                    // bottom
-                    16, 17, 19,   // first triangle
-                    17, 18, 19,    // second triangle
-
-                    // top
-                    20, 21, 23,   // first triangle
-                    21, 22, 23,    // second triangle
-                };
+                float a = 1;
 
                 float vertices[] =
                 {
@@ -119,6 +94,7 @@ static void generate_vertices(chunk_T* chunk)
 
                 int yy = 0;
                 int xx = 0;
+                int faceid = 0;
 
                 for (int i = 0; i < 12*24; i++)
                 {
@@ -128,7 +104,61 @@ static void generate_vertices(chunk_T* chunk)
                     if (xx >= 12)
                     {
                         yy += 1;
-                        xx = 0;
+                        xx = 0; 
+
+                        if (yy % 4 == 0)
+                        {
+                            faceid += 1;
+                        }
+                    }
+
+                    if (faceid == 5)
+                    {
+                        if (chunk->blocks[x][MIN(CHUNK_SIZE, y-1)][z] != BLOCK_AIR)
+                        {
+                            xx += 1;
+                            continue;
+                        }
+                    }
+                    if (faceid == 4 && y > 0 && y < CHUNK_SIZE - 1)
+                    {
+                        if (chunk->blocks[x][MAX(0, y+1)][z] != BLOCK_AIR)
+                        {
+                            xx += 1;
+                            continue;
+                        }
+                    }
+                    if (faceid == 3 && x > 0 && x < CHUNK_SIZE - 1)
+                    {
+                        if (chunk->blocks[MIN(CHUNK_SIZE, x+1)][y][z] != BLOCK_AIR)
+                        {
+                            xx += 1;
+                            continue;
+                        }
+                    }
+                    if (faceid == 2 && x > 0 && x < CHUNK_SIZE - 1)
+                    {
+                        if (chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR)
+                        {
+                            xx += 1;
+                            continue;
+                        }
+                    }
+                    if (faceid == 1 && z > 0 && z < CHUNK_SIZE - 1)
+                    {
+                        if (chunk->blocks[x][y][MIN(CHUNK_SIZE, z+1)] != BLOCK_AIR)
+                        {
+                            xx += 1;
+                            continue;
+                        }
+                    }
+                    if (faceid == 0 && z > 0 && z < CHUNK_SIZE - 1)
+                    {
+                        if (chunk->blocks[x][y][MAX(0, z-1)] != BLOCK_AIR)
+                        {
+                            xx += 1;
+                            continue;
+                        }
                     }
 
                     chunk->vertices_size += 1;
@@ -147,14 +177,36 @@ static void generate_vertices(chunk_T* chunk)
                     xx += 1;
                 }
 
-                for (int i = 0; i < 6*6; i++)
+                for (int pp = 0; pp < 6; pp++)
                 {
                     chunk->indices_size += 1;
                     chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
-                    chunk->indices[chunk->indices_size-1] = indices[i] + chunk->block_count;
+                    chunk->indices[chunk->indices_size-1] = icount + 0;
+
+                    chunk->indices_size += 1;
+                    chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
+                    chunk->indices[chunk->indices_size-1] = icount + 1;
+
+                    chunk->indices_size += 1;
+                    chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
+                    chunk->indices[chunk->indices_size-1] = icount + 3;
+
+                    chunk->indices_size += 1;
+                    chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
+                    chunk->indices[chunk->indices_size-1] = icount + 1; 
+
+                    chunk->indices_size += 1;
+                    chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
+                    chunk->indices[chunk->indices_size-1] = icount + 2;
+
+                    chunk->indices_size += 1;
+                    chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
+                    chunk->indices[chunk->indices_size-1] = icount + 3;
+
+                    icount += 4; // wuut??
                 }
                 
-                chunk->block_count += 24; // wait.... why?
+                chunk->block_count += 1; // wait.... why?
             }
         }
     }

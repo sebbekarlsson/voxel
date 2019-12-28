@@ -20,7 +20,7 @@ texture_T* TEXTURE_COBBLE;
 
 float distance;
 
-#define NR_CHUNKS 6
+#define NR_CHUNKS 1
 
 chunk_T* chunks[NR_CHUNKS][1][NR_CHUNKS];
 

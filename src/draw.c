@@ -131,8 +131,8 @@ void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, fl
 
     glUniform3fv(glGetUniformLocation(SHADER_TEXTURED_SHADED, "world_pos"), 1, (float[]){ x, y, z });
 
-    glDrawElements(GL_TRIANGLES, (6*6) * nr, GL_UNSIGNED_INT, 0);
-    //glDrawArrays(GL_POLYGON, 0, vertices_size);
+    glDrawElements(GL_TRIANGLES, (6*6) * (nr), GL_UNSIGNED_INT, 0);
+    //glDrawArrays(GL_TRIANGLES, 0, vertices_size);
 
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
