@@ -11,9 +11,10 @@
 #include <sys/param.h>
 
 
+#define NR_CHUNKS 16
 extern texture_T* TEXTURE_COBBLE;
 
-chunk_T* init_chunk(int x, int y, int z)
+chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE])
 {
     chunk_T* chunk = calloc(1, sizeof(struct CHUNK_STRUCT));
     chunk->vertices = (void*)0;
@@ -30,12 +31,14 @@ chunk_T* init_chunk(int x, int y, int z)
     {
         for (int cz = 0; cz < CHUNK_SIZE; cz++)
         {
+            height = 16 * heightmap[(x*CHUNK_SIZE)+cx][(z*CHUNK_SIZE)+cz];
+
             for (int cy = 0; cy < MIN(CHUNK_SIZE-2, MAX(2, height)); cy++)
             {
                 chunk->blocks[cx][cy][cz] = cy >= height - 1 ? BLOCK_GRASS : BLOCK_DIRT;
             }
 
-            if (random_int(0, 64) == 0)
+            /*if (random_int(0, 64) == 0)
             {
                 int radius = random_int(3, 7);
                 int h = height;
@@ -53,7 +56,7 @@ chunk_T* init_chunk(int x, int y, int z)
 
                     radius -= 1;
                 }
-            }
+            }*/
         } 
     }
 

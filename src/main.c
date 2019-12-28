@@ -11,6 +11,7 @@
 #include <coelum/utils.h>
 #include <glad/glad.h>
 #include "include/chunk.h"
+#include "include/perlin.h"
 
 
 extern theatre_T* THEATRE;
@@ -150,10 +151,16 @@ scene_T* init_scene_main()
 
     dynamic_list_append(((state_T*)s)->actors, light);
 
+    double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE];
+
+    for (int x = 0; x < NR_CHUNKS*CHUNK_SIZE; x++)
+        for (int z = 0; z < NR_CHUNKS*CHUNK_SIZE; z++)
+            heightmap[x][z] = perlin_get2d(x, z, 0.02, 24);
+
     for (int y = 0; y < 1; y++)
         for (int x = 0; x < NR_CHUNKS; x++)
             for (int z = 0; z < NR_CHUNKS; z++)
-                chunks[x][y][z] = init_chunk(x, y, z);
+                chunks[x][y][z] = init_chunk(x, y, z, heightmap);
     
     return s;
 } 
