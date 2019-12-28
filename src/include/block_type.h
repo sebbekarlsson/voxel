@@ -3,6 +3,8 @@
 enum VOXEL_BLOCK_TYPE_ENUM
 {
     BLOCK_AIR,
+    BLOCK_GRASS,
+    BLOCK_DIRT,
     BLOCK_COBBLE
 } voxel_block_type;
 #endif

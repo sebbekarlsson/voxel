@@ -115,21 +115,32 @@ void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, fl
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // color attribute
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
 
     // texcoords
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(7 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(7 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
     // normal
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(8 * sizeof(float)));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(9 * sizeof(float)));
     glEnableVertexAttribArray(3);
 
+    // shiftX
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(12 * sizeof(float)));
+    glEnableVertexAttribArray(4);
+
+    // shiftY
+    glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(13 * sizeof(float)));
+    glEnableVertexAttribArray(5);
+
     glUniform3fv(glGetUniformLocation(SHADER_TEXTURED_SHADED, "world_pos"), 1, (float[]){ x, y, z });
+    
+    glUniform1i(glGetUniformLocation(SHADER_TEXTURED_SHADED, "atlas_width"), 16);
+    glUniform1i(glGetUniformLocation(SHADER_TEXTURED_SHADED, "atlas_height"), 16);
 
     glDrawElements(GL_TRIANGLES, (6*6) * (nr), GL_UNSIGNED_INT, 0);
     //glDrawArrays(GL_TRIANGLES, 0, vertices_size);

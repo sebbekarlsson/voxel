@@ -3,6 +3,8 @@
 #include <stddef.h>
 
 
+#define CHUNK_SIZE 16
+
 typedef struct CHUNK_STRUCT
 {
     int blocks[16][16][16];
@@ -20,4 +22,6 @@ typedef struct CHUNK_STRUCT
 chunk_T* init_chunk();
 
 void chunk_draw(chunk_T* chunk);
+
+void chunk_generate_vertices(chunk_T* chunk);
 #endif

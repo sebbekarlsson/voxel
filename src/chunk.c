@@ -10,14 +10,65 @@
 #include <stdlib.h>
 #include <sys/param.h>
 
-
-#define CHUNK_SIZE 16
-
 extern texture_T* TEXTURE_COBBLE;
 
-
-static void generate_vertices(chunk_T* chunk)
+chunk_T* init_chunk(int x, int y, int z)
 {
+    chunk_T* chunk = calloc(1, sizeof(struct CHUNK_STRUCT));
+    chunk->vertices = (void*)0;
+    chunk->indices = (void*)0;
+    chunk->vertices_size = 0;
+    chunk->indices_size = 0;
+    chunk->x = x;
+    chunk->y = y;
+    chunk->z = z;
+
+    for (int y = 0; y < CHUNK_SIZE; y++)
+    {
+        for (int x = 0; x < CHUNK_SIZE; x++)
+        {
+            for (int z = 0; z < CHUNK_SIZE; z++)
+            {
+                chunk->blocks[x][y][z] = y >= CHUNK_SIZE-1 ? BLOCK_GRASS : BLOCK_DIRT;//random_int(0, 3) == 0 ? BLOCK_AIR : BLOCK_COBBLE;
+
+                if (random_int(0, 10) == 0)
+                    chunk->blocks[x][y][z] = BLOCK_COBBLE;
+            }
+        }
+    }
+
+
+    chunk_generate_vertices(chunk);
+
+    return chunk;
+}
+
+void chunk_draw(chunk_T* chunk)
+{
+    state_T* state = get_current_state();
+
+    draw_cube(
+        state,
+        TEXTURE_COBBLE,
+        chunk->x * CHUNK_SIZE,
+        chunk->y * CHUNK_SIZE,
+        chunk->z * CHUNK_SIZE,
+        chunk->vertices,
+        chunk->vertices_size,
+        chunk->indices,
+        chunk->indices_size,
+        chunk->block_count
+    );
+}
+
+void chunk_generate_vertices(chunk_T* chunk)
+{
+    if (chunk->vertices != (void*)0)
+        free(chunk->vertices);
+
+    if (chunk->indices != (void*)0)
+        free(chunk->indices);
+
     chunk->vertices_size = 0;
     chunk->indices_size = 0;
     chunk->vertices = (void*)0;
@@ -53,55 +104,62 @@ static void generate_vertices(chunk_T* chunk)
                 float b = 255;
                 float a = 1;
 
+                int shiftX = 0;
+                int shiftY = 0;
+
+                switch (chunk->blocks[x][y][z])
+                {
+                    case BLOCK_GRASS: shiftX = 0; break;
+                    case BLOCK_COBBLE: shiftX = 0; shiftY = 1; break;
+                    case BLOCK_DIRT: shiftX = 2; break;
+                }
+
                 float vertices[] =
                 {
                     // positions            // colors                                // texture coords
-                    0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 0.0f, 1.0f,   // top right
-                    width,  0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 0.0f, 1.0f,   // bottom right
-                    width,  height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,     0.0f, 0.0f, 1.0f,   // bottom left
-                    0.0f,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 0.0f, 1.0f,    // top left
+                    0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 0.0f, 1.0f,  shiftX, shiftY, // top right
+                    width,  0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 0.0f, 1.0f,  shiftX, shiftY, // bottom right
+                    width,  height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,     0.0f, 0.0f, 1.0f,  shiftX, shiftY, // bottom left
+                    0.0f,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 0.0f, 1.0f,  shiftX, shiftY,  // top left
 
                     // positions            // colors                                // texture c    oords
-                    0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 0.0f, -1.0f,   // top right
-                    width,  0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 0.0f, -1.0f,   // bottom right
-                    width,  height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,     0.0f, 0.0f, -1.0f,   // bottom left
-                    0.0f,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 0.0f, -1.0f,    // top left
+                    0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 0.0f, -1.0f, shiftX, shiftY,   // top right
+                    width,  0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 0.0f, -1.0f, shiftX, shiftY,   // bottom right
+                    width,  height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,     0.0f, 0.0f, -1.0f, shiftX, shiftY,   // bottom left
+                    0.0f,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 0.0f, -1.0f, shiftX, shiftY,    // top left
 
                     // positions            // colors                                // texture c    oords
-                    0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     -1.0f, 0.0f, 0.0f,   // top right
-                    0.0f,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,   // bottom right
-                    0.0f,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,    -1.0f, 0.0f, 0.0f,   // bottom left
-                    0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,    -1.0f, 0.0f, 0.0f,    // top left
+                    0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     -1.0f, 0.0f, 0.0f, shiftX, shiftY, // top right
+                    0.0f,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     -1.0f, 0.0f, 0.0f, shiftX, shiftY, // bottom right
+                    0.0f,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,    -1.0f, 0.0f, 0.0f, shiftX, shiftY, // bottom left
+                    0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,    -1.0f, 0.0f, 0.0f, shiftX, shiftY,  // top left
 
                     // positions            // colors                                // texture c    oords
-                    width,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     1.0f, 0.0f, 0.0f,   // top right
-                    width,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     1.0f, 0.0f, 0.0f,   // bottom right
-                    width,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,    1.0f, 0.0f, 0.0f,   // bottom left
-                    width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,    1.0f, 0.0f, 0.0f,    // top left
+                    width,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     1.0f, 0.0f, 0.0f, shiftX, shiftY, // top right
+                    width,   height,  0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     1.0f, 0.0f, 0.0f, shiftX, shiftY, // bottom right
+                    width,   height,  width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,    1.0f, 0.0f, 0.0f, shiftX, shiftY, // bottom left
+                    width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,    1.0f, 0.0f, 0.0f, shiftX, shiftY,  // top left
 
                     // positions            // colors                                // texture c    oords
-                    0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 1.0f, 0.0f,   // top right
-                    0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 1.0f, 0.0f,   // bottom right
-                    width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,   0.0f, 1.0f, 0.0f,   // bottom left
-                    width,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 1.0f, 0.0f,    // top left
+                    0.0f,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,     0.0f, 1.0f, 0.0f,  shiftX, shiftY, // top right
+                    0.0f,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,     0.0f, 1.0f, 0.0f, shiftX, shiftY, // bottom right
+                    width,   0.0f,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,   0.0f, 1.0f, 0.0f,  shiftX, shiftY, // bottom left
+                    width,   0.0f,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,     0.0f, 1.0f, 0.0f, shiftX, shiftY,  // top left
 
                     // positions            // colors                                // texture c    oords
-                    0.0f,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,    0.0f, -1.0f, 0.0f,   // top right
-                    0.0f,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,   0.0f, -1.0f, 0.0f,   // bottom right
-                    width,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,  0.0f, -1.0f, 0.0f,   // bottom left
-                    width,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,   0.0f, -1.0f, 0.0f,    // top left
+                    0.0f,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 0.0f,    0.0f, -1.0f, 0.0f, shiftX, shiftY,  // top right
+                    0.0f,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 0.0f,   0.0f, -1.0f, 0.0f, shiftX, shiftY,  // bottom right
+                    width,   height,    width,  r / 255.0f, g / 255.0f, b / 255.0f, a,   1.0f, 1.0f,  0.0f, -1.0f, 0.0f, shiftX, shiftY,  // bottom left
+                    width,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,   0.0f, -1.0f, 0.0f, shiftX, shiftY,    // top left
                 };
 
                 int yy = 0;
                 int xx = 0;
                 int faceid = 0;
 
-                for (int i = 0; i < 12*24; i++)
+                for (int i = 0; i < 14*24; i++)
                 {
-                    if (chunk->vertices == (void*)0)
-                        chunk->vertices = calloc(1, sizeof(float));
-
-                    if (xx >= 12)
+                    if (xx >= 14)
                     {
                         yy += 1;
                         xx = 0; 
@@ -112,23 +170,23 @@ static void generate_vertices(chunk_T* chunk)
                         }
                     }
 
-                    if (faceid == 5)
+                    if (faceid == 4)
                     {
-                        if (chunk->blocks[x][MAX(0, y-1)][z] != BLOCK_AIR && y < CHUNK_SIZE - 1)
+                        if (chunk->blocks[x][MAX(CHUNK_SIZE, y+1)][z] != BLOCK_AIR && y < CHUNK_SIZE - 1)
                         {
                             xx += 1;
                             continue;
                         }
                     }
-                    if (faceid == 4 && y > 0 && y < CHUNK_SIZE - 1)
+                    else if (faceid == 4 && y > 0 && y < CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[x][MAX(0, y-1)][z] != BLOCK_AIR && chunk->blocks[x][MIN(CHUNK_SIZE, y+1)][z] != BLOCK_AIR)
                         {
-                            xx += 1;
-                            continue;
+                            //xx += 1;
+                            //continue;
                         }
                     }
-                    if (faceid == 3 && x > 0 && x < CHUNK_SIZE - 1)
+                    else if (faceid == 3 && x > 0 && x < CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[MIN(CHUNK_SIZE, x+1)][y][z] != BLOCK_AIR)
                         {
@@ -136,7 +194,7 @@ static void generate_vertices(chunk_T* chunk)
                             continue;
                         }
                     }
-                    if (faceid == 2 && x > 0 && x < CHUNK_SIZE - 1)
+                    else if (faceid == 2 && x > 0 && x < CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR)
                         {
@@ -144,7 +202,7 @@ static void generate_vertices(chunk_T* chunk)
                             continue;
                         }
                     }
-                    if (faceid == 1 && z > 0 && z < CHUNK_SIZE - 1)
+                    else if (faceid == 1 && z > 0 && z < CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[x][y][MIN(CHUNK_SIZE, z+1)] != BLOCK_AIR)
                         {
@@ -152,7 +210,7 @@ static void generate_vertices(chunk_T* chunk)
                             continue;
                         }
                     }
-                    if (faceid == 0 && z > 0 && z < CHUNK_SIZE - 1)
+                    else if (faceid == 0 && z > 0 && z < CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[x][y][MAX(0, z-1)] != BLOCK_AIR)
                         {
@@ -161,8 +219,14 @@ static void generate_vertices(chunk_T* chunk)
                         }
                     }
 
+                    
                     chunk->vertices_size += 1;
-                    chunk->vertices = realloc(chunk->vertices, chunk->vertices_size * sizeof(float));
+
+                    if (chunk->vertices == (void*)0)
+                        chunk->vertices = calloc(chunk->vertices_size, sizeof(float));
+                    else
+                        chunk->vertices = realloc(chunk->vertices, chunk->vertices_size * sizeof(float));
+
                     chunk->vertices[chunk->vertices_size-1] = vertices[i];
 
                     if (xx == 0)
@@ -205,79 +269,9 @@ static void generate_vertices(chunk_T* chunk)
 
                     icount += 4; // wuut??
                 }
-                
+
                 chunk->block_count += 1; // wait.... why?
             }
         }
     }
-}
-
-chunk_T* init_chunk(int x, int y, int z)
-{
-    chunk_T* chunk = calloc(1, sizeof(struct CHUNK_STRUCT));
-    chunk->vertices = (void*)0;
-    chunk->indices = (void*)0;
-    chunk->vertices_size = 0;
-    chunk->indices_size = 0;
-    chunk->x = x;
-    chunk->y = y;
-    chunk->z = z;
-
-    for (int y = 0; y < CHUNK_SIZE; y++)
-        for (int x = 0; x < CHUNK_SIZE; x++)
-            for (int z = 0; z < CHUNK_SIZE; z++)
-                chunk->blocks[x][y][z] = BLOCK_COBBLE;//random_int(0, 3) == 0 ? BLOCK_AIR : BLOCK_COBBLE;
-
-
-    generate_vertices(chunk);
-
-    return chunk;
-}
-
-void chunk_draw(chunk_T* chunk)
-{
-    state_T* state = get_current_state();
-
-    // TODO: Calculate and make all cube draws into one single call.
-
-    /*for (int y = 0; y < CHUNK_SIZE; y++)
-    {
-        for (int x = 0; x < CHUNK_SIZE; x++)
-        {
-            for (int z = 0; z < CHUNK_SIZE; z++)
-            {
-                texture_T* texture = (void*)0;
-
-                if (chunk->blocks[x][y][z] == BLOCK_COBBLE)
-                    texture = TEXTURE_COBBLE;
-
-                if (x != 0 && y != 0 && z != 0 && x != CHUNK_SIZE - 1 && y != CHUNK_SIZE - 1 && z != CHUNK_SIZE - 1)
-                if (
-                   chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR &&
-                   chunk->blocks[MIN(CHUNK_SIZE - 1, x+1)][y][z] != BLOCK_AIR &&
-                   chunk->blocks[x][MIN(0, y-1)][z] != BLOCK_AIR &&
-                   chunk->blocks[x][MAX(CHUNK_SIZE - 1, y+1)][z] != BLOCK_AIR &&
-                   chunk->blocks[x][y][MIN(0, z-1)] != BLOCK_AIR &&
-                   chunk->blocks[x][y][MAX(CHUNK_SIZE - 1, z+1)] != BLOCK_AIR
-                )
-                    continue;
-
-                if (texture != (void*)0)
-                    draw_cube(state, texture, x, y, z);
-            }
-        }
-    }*/
-
-    draw_cube(
-        state,
-        TEXTURE_COBBLE,
-        chunk->x * CHUNK_SIZE,
-        chunk->y * CHUNK_SIZE,
-        chunk->z * CHUNK_SIZE,
-        chunk->vertices,
-        chunk->vertices_size,
-        chunk->indices,
-        chunk->indices_size,
-        chunk->block_count
-    );
 }

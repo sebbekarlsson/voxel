@@ -8,6 +8,7 @@
 #include <coelum/camera.h>
 #include <coelum/input.h>
 #include <coelum/actor_light.h>
+#include <coelum/utils.h>
 #include <glad/glad.h>
 #include "include/chunk.h"
 
@@ -20,9 +21,13 @@ texture_T* TEXTURE_COBBLE;
 
 float distance;
 
-#define NR_CHUNKS 4
+#define NR_CHUNKS 6
 
 chunk_T* chunks[NR_CHUNKS][1][NR_CHUNKS];
+
+
+float px;
+float py;
 
 
 
@@ -75,9 +80,21 @@ void custom_scene_draw(scene_T* scene)
     draw_grid(state, 0, 0, 0);
 
     for (int y = 0; y < 1; y++)
+    {
         for (int x = 0; x < NR_CHUNKS; x++)
+        {
             for (int z = 0; z < NR_CHUNKS; z++)
-                chunk_draw(chunks[x][y][z]);
+            {
+                int cx = (x * CHUNK_SIZE) + (CHUNK_SIZE / 2);
+                int cz = (z * CHUNK_SIZE) + (CHUNK_SIZE / 2);
+                
+                if (vec2_distance(cx, cz, state->camera->x, state->camera->z) > (CHUNK_SIZE * 4))
+                    continue;
+
+                chunk_draw(chunks[x][y][z]); 
+            }
+        }
+    }
 
 
     camera_unbind(state->camera);
@@ -130,7 +147,7 @@ scene_T* init_scene_main()
     state->camera->ry = 0;
 
     actor_light_T* light = init_actor_light(
-        0.0f, 2.0f, 2.0f,
+        0.0f, 16.0f, 2.0f,
         13.0f        
     );
 
@@ -148,7 +165,10 @@ int main(int argc, char* argv[])
 {
     coelum_init();
 
-    TEXTURE_COBBLE = get_texture("cobble.png", GL_RGB);
+    px = 0;
+    py = 0;
+
+    TEXTURE_COBBLE = get_texture("res/sheet.png", GL_RGBA);
 
     MOUSE_STATE->input_mode = GLFW_CURSOR_DISABLED;
 
