@@ -21,14 +21,9 @@ texture_T* TEXTURE_COBBLE;
 
 float distance;
 
-#define NR_CHUNKS 6
+#define NR_CHUNKS 16
 
 chunk_T* chunks[NR_CHUNKS][1][NR_CHUNKS];
-
-
-float px;
-float py;
-
 
 
 void draw_grid(state_T* state, float x, float y, float z)
@@ -149,7 +144,7 @@ scene_T* init_scene_main()
     projection_view_recalculate_projection(state->camera->projection_view);
 
     actor_light_T* light = init_actor_light(
-        0.0f, 16.0f, 2.0f,
+        0.0f, 8.0f, 2.0f,
         13.0f        
     );
 
@@ -166,9 +161,6 @@ scene_T* init_scene_main()
 int main(int argc, char* argv[])
 {
     coelum_init();
-
-    px = 0;
-    py = 0;
 
     TEXTURE_COBBLE = get_texture("res/sheet.png", GL_RGBA);
 

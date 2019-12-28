@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <sys/param.h>
 
+
 extern texture_T* TEXTURE_COBBLE;
 
 chunk_T* init_chunk(int x, int y, int z)
@@ -23,18 +24,37 @@ chunk_T* init_chunk(int x, int y, int z)
     chunk->y = y;
     chunk->z = z;
 
-    for (int y = 0; y < CHUNK_SIZE; y++)
-    {
-        for (int x = 0; x < CHUNK_SIZE; x++)
-        {
-            for (int z = 0; z < CHUNK_SIZE; z++)
-            {
-                chunk->blocks[x][y][z] = y >= CHUNK_SIZE-1 ? BLOCK_GRASS : BLOCK_DIRT;//random_int(0, 3) == 0 ? BLOCK_AIR : BLOCK_COBBLE;
+    int height = CHUNK_SIZE / 2;
 
-                if (random_int(0, 10) == 0)
-                    chunk->blocks[x][y][z] = BLOCK_COBBLE;
+    for (int cx = 0; cx < CHUNK_SIZE; cx++)
+    {
+        for (int cz = 0; cz < CHUNK_SIZE; cz++)
+        {
+            for (int cy = 0; cy < MIN(CHUNK_SIZE-2, MAX(2, height)); cy++)
+            {
+                chunk->blocks[cx][cy][cz] = cy >= height - 1 ? BLOCK_GRASS : BLOCK_DIRT;
             }
-        }
+
+            if (random_int(0, 64) == 0)
+            {
+                int radius = random_int(3, 7);
+                int h = height;
+                
+                for (int yy = height; yy < height + radius; yy++)
+                {
+                    for(int zz=-radius; zz<=radius; zz++)
+                    {
+                        for(int xx=-radius; xx<=radius; xx++)
+                        {
+                            if (floor(vec2_distance(cx + xx, cz + zz, cx, cz)) < radius)
+                            chunk->blocks[MIN(CHUNK_SIZE-1,MAX(0, cx+xx))][yy][MIN(CHUNK_SIZE-1, MAX(0, cz+zz))] = yy < ((height + radius)-random_int(3, 4)) ? BLOCK_DIRT : BLOCK_GRASS;
+                        }
+                    }
+
+                    radius -= 1;
+                }
+            }
+        } 
     }
 
 

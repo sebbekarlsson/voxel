@@ -1,4 +1,5 @@
 #include "include/draw.h"
+#include <coelum/draw_utils.h>
 
 
 extern unsigned int SHADER_TEXTURED_SHADED;
