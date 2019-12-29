@@ -25,7 +25,20 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
     chunk->y = y;
     chunk->z = z;
 
+    init_random();
+
     int height = CHUNK_SIZE / 2;
+
+    for (int cx = 0; cx < CHUNK_SIZE; cx++)
+    {
+        for (int cz = 0; cz < CHUNK_SIZE; cz++)
+        {
+            for (int cy = 0; cy < CHUNK_SIZE; cy++)
+            {
+                chunk->blocks[cx][cy][cz] = BLOCK_AIR;
+            }
+        }
+    }
 
     for (int cx = 0; cx < CHUNK_SIZE; cx++)
     {
@@ -35,28 +48,38 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
 
             for (int cy = 0; cy < MIN(CHUNK_SIZE-2, MAX(2, height)); cy++)
             {
-                chunk->blocks[cx][cy][cz] = cy >= height - 1 ? BLOCK_GRASS : BLOCK_DIRT;
+                chunk->blocks[cx][cy][cz] = cy >= height - random_int(0, 1) ? BLOCK_GRASS : BLOCK_DIRT;
             }
 
-            /*if (random_int(0, 64) == 0)
+            if (random_int(0, 128) == 0)
             {
-                int radius = random_int(3, 7);
-                int h = height;
-                
-                for (int yy = height; yy < height + radius; yy++)
+                int tree_height = random_int(4, 6);
+
+                for (int i = height; i < height+tree_height; i++)
                 {
-                    for(int zz=-radius; zz<=radius; zz++)
+                    chunk->blocks[cx][MIN(CHUNK_SIZE-1, i)][cz] = BLOCK_LOG;
+                }
+
+                int radius = 5;
+
+                int h = (height + tree_height) - radius / 2;
+                
+                for (int yr = h; yr < height+tree_height; yr++)
+                {
+                    for (int xr = -radius; xr <=radius; xr++)
                     {
-                        for(int xx=-radius; xx<=radius; xx++)
+                        for (int zr = -radius; zr <=radius; zr++)
                         {
-                            if (floor(vec2_distance(cx + xx, cz + zz, cx, cz)) < radius)
-                            chunk->blocks[MIN(CHUNK_SIZE-1,MAX(0, cx+xx))][yy][MIN(CHUNK_SIZE-1, MAX(0, cz+zz))] = yy < ((height + radius)-random_int(3, 4)) ? BLOCK_DIRT : BLOCK_GRASS;
+                            if (vec2_distance(cx + xr, cz + zr, cx, cz) < radius)
+                            {
+                                chunk->blocks[MIN(CHUNK_SIZE-1, MAX(0, cx+xr))][MIN(CHUNK_SIZE-1, yr)][MIN(CHUNK_SIZE-1, MAX(0, cz + zr))] = BLOCK_LEAF;
+                            }
                         }
                     }
 
                     radius -= 1;
                 }
-            }*/
+            }
         } 
     }
 
@@ -135,6 +158,8 @@ void chunk_generate_vertices(chunk_T* chunk)
                     case BLOCK_GRASS: shiftX = 0; break;
                     case BLOCK_COBBLE: shiftX = 0; shiftY = 1; break;
                     case BLOCK_DIRT: shiftX = 2; break;
+                    case BLOCK_LOG: shiftX = 4; shiftY = 1; break;
+                    case BLOCK_LEAF: shiftX = 5; shiftY = 3; break;
                 }
 
                 float vertices[] =
@@ -195,7 +220,7 @@ void chunk_generate_vertices(chunk_T* chunk)
 
                     if (faceid == 4)
                     {
-                        if (chunk->blocks[x][MAX(CHUNK_SIZE, y+1)][z] != BLOCK_AIR && y < CHUNK_SIZE - 1)
+                        if (chunk->blocks[x][MAX(0, y-1)][z] != BLOCK_AIR)
                         {
                             xx += 1;
                             continue;

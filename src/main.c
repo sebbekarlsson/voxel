@@ -12,11 +12,11 @@
 #include <glad/glad.h>
 #include "include/chunk.h"
 #include "include/perlin.h"
+#include "include/actor_player.h"
 
 
 extern theatre_T* THEATRE;
 extern mouse_state_T* MOUSE_STATE;
-extern keyboard_state_T* KEYBOARD_STATE;
 
 texture_T* TEXTURE_COBBLE;
 
@@ -98,30 +98,7 @@ void custom_scene_draw(scene_T* scene)
 
 void custom_scene_tick(scene_T* scene)
 {
-    state_T* state = (state_T*) scene;
-
-    float wspeed = 0.1f;
-    
-    if (KEYBOARD_STATE->keys[GLFW_KEY_W])
-    {
-        state->camera->x += cos(glm_rad(state->camera->ry + 90)) * wspeed;
-        state->camera->z -= sin(glm_rad(state->camera->ry + 90)) * wspeed;
-        distance += 0.3f;
-    }
-
-    if (KEYBOARD_STATE->keys[GLFW_KEY_S])
-    {
-        state->camera->x -= cos(glm_rad(state->camera->ry + 90)) * wspeed;
-        state->camera->z += sin(glm_rad(state->camera->ry + 90)) * wspeed;
-    }
-
-    state->camera->y = 18 - (cos(distance) * 0.1f);
-
-    state->camera->offset_x = state->camera->x;
-    state->camera->offset_y = state->camera->y;
-    state->camera->offset_z = state->camera->z;
-    state->camera->rx += MOUSE_STATE->dy * 0.25f;
-    state->camera->ry += MOUSE_STATE->dx * 0.25f;
+    state_T* state = (state_T*) scene; 
 }
 
 scene_T* init_scene_main()
@@ -149,19 +126,23 @@ scene_T* init_scene_main()
         13.0f        
     );
 
+    actor_player_T* actor_player = init_actor_player(25.0f, 32.0f, 25.0f);
+
     dynamic_list_append(((state_T*)s)->actors, light);
 
     double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE];
 
     for (int x = 0; x < NR_CHUNKS*CHUNK_SIZE; x++)
         for (int z = 0; z < NR_CHUNKS*CHUNK_SIZE; z++)
-            heightmap[x][z] = perlin_get2d(x, z, 0.02, 24);
+            heightmap[x][z] = perlin_get2d(x, z, 0.03, 24);
 
     for (int y = 0; y < 1; y++)
         for (int x = 0; x < NR_CHUNKS; x++)
             for (int z = 0; z < NR_CHUNKS; z++)
                 chunks[x][y][z] = init_chunk(x, y, z, heightmap);
     
+    dynamic_list_append(((state_T*)s)->actors, (actor_T*)actor_player);
+
     return s;
 } 
 
