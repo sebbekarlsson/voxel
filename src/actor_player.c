@@ -33,8 +33,6 @@ void actor_player_tick(actor_T* self)
     scene_T* scene = get_current_scene();
     state_T* state = (state_T*) scene;
 
-    actor_player_move(self, self->dx, self->dy, self->dz);
-
     physics_to_zero(&self->dx, self->friction);
     physics_to_zero(&self->dy, 0.009f);
     physics_to_zero(&self->dz, self->friction);
@@ -61,13 +59,15 @@ void actor_player_tick(actor_T* self)
 
     state->camera->x = self->x + 0.5f;
     state->camera->z = self->z + 0.5f;
-    state->camera->y = self->y - (cos(actor_player->distance) * 0.1f);
+    state->camera->y = (self->y - 0.5f) - (cos(actor_player->distance) * 0.1f);
 
     state->camera->offset_x = state->camera->x;
     state->camera->offset_y = state->camera->y;
     state->camera->offset_z = state->camera->z;
     state->camera->rx += MOUSE_STATE->dy * 0.25f;
     state->camera->ry += MOUSE_STATE->dx * 0.25f;
+
+    actor_player_move(self, self->dx, self->dy, self->dz);
 }
 
 void actor_player_draw(actor_T* actor)
@@ -111,7 +111,7 @@ void actor_player_move(actor_T* actor, float xa, float ya, float za)
                 {
                     if (pz + actor->width >= bz && pz <= bz + w)
                     {
-                        if (py - actor->height >= by && py - actor->height <= by + w)
+                        if ((py - actor->height >= by && py - actor->height <= by + w) || (py-0.3f >= by && py-1 <= by+w))
                         {
                             is_colliding = 1;
                             break;
@@ -147,7 +147,7 @@ void actor_player_move(actor_T* actor, float xa, float ya, float za)
                 {
                     if (pz + actor->width >= bz && pz <= bz + w)
                     {
-                        if (py + actor->height >= by && py <= by + w)
+                        if (py >= by && py <= by + w)
                         {
                             is_ground_below = 1;
                             break;

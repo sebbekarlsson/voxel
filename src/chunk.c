@@ -25,8 +25,6 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
     chunk->y = y;
     chunk->z = z;
 
-    init_random();
-
     int height = CHUNK_SIZE / 2;
 
     for (int cx = 0; cx < CHUNK_SIZE; cx++)
@@ -63,7 +61,7 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
                     chunk->blocks[cx][MIN(CHUNK_SIZE-1, i)][cz] = BLOCK_LOG;
                 }
 
-                int radius = 5;
+                int radius = random_int(3, 6);
 
                 int h = (height + tree_height) - radius / 2;
                 

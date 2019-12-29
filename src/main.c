@@ -150,6 +150,8 @@ int main(int argc, char* argv[])
 {
     coelum_init();
 
+    init_random();
+
     TEXTURE_COBBLE = get_texture("res/sheet.png", GL_RGBA);
 
     MOUSE_STATE->input_mode = GLFW_CURSOR_DISABLED;
