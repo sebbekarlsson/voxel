@@ -48,7 +48,10 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
 
             for (int cy = 0; cy < MIN(CHUNK_SIZE-2, MAX(2, height)); cy++)
             {
-                chunk->blocks[cx][cy][cz] = cy >= height - random_int(0, 1) ? BLOCK_GRASS : BLOCK_DIRT;
+                if (height <= 8)
+                    chunk->blocks[cx][cy][cz] = cy >= height - 1 ? BLOCK_GRASS : BLOCK_DIRT;
+                else
+                    chunk->blocks[cx][cy][cz] = BLOCK_COBBLE;
             }
 
             if (random_int(0, 128) == 0)
