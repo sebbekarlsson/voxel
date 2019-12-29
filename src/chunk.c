@@ -46,11 +46,6 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
 
             height = MAX(0, ((CHUNK_SIZE * NR_CHUNKS_Y) * heightmap[(x*CHUNK_SIZE)+cx][(z*CHUNK_SIZE)+cz]));
 
-            //if (height >= chunk->y + CHUNK_SIZE)
-            //    height = height;//height = CHUNK_SIZE;
-            //if (height < chunk->y * CHUNK_SIZE)
-            //    height = 0;
-
             for (int cy = chunk->y * CHUNK_SIZE; cy < height; cy++)
             {
                 int placey = cy % 16;
@@ -60,36 +55,6 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
                 if (placey >= CHUNK_SIZE)
                     break;
             }
-
-            /*if (random_int(0, 128) == 0)
-            {
-                int tree_height = random_int(4, 6);
-
-                for (int i = height; i < height+tree_height; i++)
-                {
-                    chunk->blocks[cx][MIN(CHUNK_SIZE-1, i)][cz] = BLOCK_LOG;
-                }
-
-                int radius = random_int(3, 6);
-
-                int h = (height + tree_height) - radius / 2;
-                
-                for (int yr = h; yr < height+tree_height; yr++)
-                {
-                    for (int xr = -radius; xr <=radius; xr++)
-                    {
-                        for (int zr = -radius; zr <=radius; zr++)
-                        {
-                            if (vec2_distance(cx + xr, cz + zr, cx, cz) < radius)
-                            {
-                                chunk->blocks[MIN(CHUNK_SIZE-1, MAX(0, cx+xr))][MIN(CHUNK_SIZE-1, yr)][MIN(CHUNK_SIZE-1, MAX(0, cz + zr))] = BLOCK_LEAF;
-                            }
-                        }
-                    }
-
-                    radius -= 1;
-                }
-            }*/
         } 
     }
 
