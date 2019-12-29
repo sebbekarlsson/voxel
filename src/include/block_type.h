@@ -7,6 +7,7 @@ enum VOXEL_BLOCK_TYPE_ENUM
     BLOCK_DIRT,
     BLOCK_COBBLE,
     BLOCK_LOG,
-    BLOCK_LEAF
+    BLOCK_LEAF,
+    BLOCK_PLANKS
 } voxel_block_type;
 #endif

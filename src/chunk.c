@@ -161,6 +161,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                     case BLOCK_DIRT: shiftX = 2; break;
                     case BLOCK_LOG: shiftX = 4; shiftY = 1; break;
                     case BLOCK_LEAF: shiftX = 5; shiftY = 3; break;
+                    case BLOCK_PLANKS: shiftX = 4; shiftY = 0; break;
                 }
 
                 float vertices[] =
