@@ -23,6 +23,7 @@ texture_T* TEXTURE_COBBLE;
 float distance;
 
 #define NR_CHUNKS 16
+#define RENDER_DISTANCE 5
 
 chunk_T* chunks[NR_CHUNKS][1][NR_CHUNKS];
 
@@ -84,7 +85,7 @@ void custom_scene_draw(scene_T* scene)
                 int cx = (x * CHUNK_SIZE) + (CHUNK_SIZE / 2);
                 int cz = (z * CHUNK_SIZE) + (CHUNK_SIZE / 2);
                 
-                if (vec2_distance(cx, cz, state->camera->x, state->camera->z) > (CHUNK_SIZE * 4))
+                if (vec2_distance(cx, cz, state->camera->x, state->camera->z) > (CHUNK_SIZE * RENDER_DISTANCE))
                     continue;
 
                 chunk_draw(chunks[x][y][z]); 
