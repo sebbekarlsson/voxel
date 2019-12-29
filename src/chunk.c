@@ -12,6 +12,7 @@
 
 
 #define NR_CHUNKS 16
+#define NR_CHUNKS_Y 2
 extern texture_T* TEXTURE_COBBLE;
 
 chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE])
@@ -42,17 +43,25 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
     {
         for (int cz = 0; cz < CHUNK_SIZE; cz++)
         {
-            height = 16 * heightmap[(x*CHUNK_SIZE)+cx][(z*CHUNK_SIZE)+cz];
 
-            for (int cy = 0; cy < MIN(CHUNK_SIZE-2, MAX(2, height)); cy++)
+            height = MAX(0, ((CHUNK_SIZE * NR_CHUNKS_Y) * heightmap[(x*CHUNK_SIZE)+cx][(z*CHUNK_SIZE)+cz]));
+
+            //if (height >= chunk->y + CHUNK_SIZE)
+            //    height = height;//height = CHUNK_SIZE;
+            //if (height < chunk->y * CHUNK_SIZE)
+            //    height = 0;
+
+            for (int cy = chunk->y * CHUNK_SIZE; cy < height; cy++)
             {
-                if (height <= 8)
-                    chunk->blocks[cx][cy][cz] = cy >= height - 1 ? BLOCK_GRASS : BLOCK_DIRT;
-                else
-                    chunk->blocks[cx][cy][cz] = BLOCK_COBBLE;
+                int placey = cy % 16;
+
+                chunk->blocks[cx][placey][cz] = cy >= 18 ? BLOCK_COBBLE : BLOCK_GRASS;
+
+                if (placey >= CHUNK_SIZE)
+                    break;
             }
 
-            if (random_int(0, 128) == 0)
+            /*if (random_int(0, 128) == 0)
             {
                 int tree_height = random_int(4, 6);
 
@@ -80,7 +89,7 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
 
                     radius -= 1;
                 }
-            }
+            }*/
         } 
     }
 

@@ -10,6 +10,7 @@
 #include <coelum/actor_light.h>
 #include <coelum/utils.h>
 #include <glad/glad.h>
+#include <sys/param.h>
 #include "include/chunk.h"
 #include "include/perlin.h"
 #include "include/actor_player.h"
@@ -23,9 +24,10 @@ texture_T* TEXTURE_COBBLE;
 float distance;
 
 #define NR_CHUNKS 16
+#define NR_CHUNKS_Y 2
 #define RENDER_DISTANCE 4
 
-chunk_T* chunks[NR_CHUNKS][1][NR_CHUNKS];
+chunk_T* chunks[NR_CHUNKS][NR_CHUNKS_Y][NR_CHUNKS];
 
 
 void draw_grid(state_T* state, float x, float y, float z)
@@ -76,7 +78,7 @@ void custom_scene_draw(scene_T* scene)
     
     draw_grid(state, 0, 0, 0);
 
-    for (int y = 0; y < 1; y++)
+    for (int y = 0; y < NR_CHUNKS_Y; y++)
     {
         for (int x = 0; x < NR_CHUNKS; x++)
         {
@@ -84,6 +86,10 @@ void custom_scene_draw(scene_T* scene)
             {
                 int cx = (x * CHUNK_SIZE) + (CHUNK_SIZE / 2);
                 int cz = (z * CHUNK_SIZE) + (CHUNK_SIZE / 2);
+                int cy = (y * CHUNK_SIZE) + (CHUNK_SIZE / 2);
+
+                if (MAX(cy, state->camera->y) - MIN(cy, state->camera->y) > CHUNK_SIZE*2)
+                    continue;
                 
                 if (vec2_distance(cx, cz, state->camera->x, state->camera->z) > (CHUNK_SIZE * RENDER_DISTANCE))
                     continue;
@@ -134,10 +140,14 @@ scene_T* init_scene_main()
     double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE];
 
     for (int x = 0; x < NR_CHUNKS*CHUNK_SIZE; x++)
+    {
         for (int z = 0; z < NR_CHUNKS*CHUNK_SIZE; z++)
-            heightmap[x][z] = perlin_get2d(x, z, 0.03, 24);
+        {
+            heightmap[x][z] = perlin_get2d(x, z, 0.02, 4.5f);
+        }
+    }
 
-    for (int y = 0; y < 1; y++)
+    for (int y = 0; y < NR_CHUNKS_Y; y++)
         for (int x = 0; x < NR_CHUNKS; x++)
             for (int z = 0; z < NR_CHUNKS; z++)
                 chunks[x][y][z] = init_chunk(x, y, z, heightmap);

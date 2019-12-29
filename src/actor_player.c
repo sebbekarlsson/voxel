@@ -6,10 +6,11 @@
 #include <coelum/input.h>
 
 #define NR_CHUNKS 16
+#define NR_CHUNKS_Y 2
 
 extern keyboard_state_T* KEYBOARD_STATE;
 extern mouse_state_T* MOUSE_STATE;
-extern chunk_T* chunks[NR_CHUNKS][1][NR_CHUNKS];
+extern chunk_T* chunks[NR_CHUNKS][NR_CHUNKS_Y][NR_CHUNKS];
 
 actor_player_T* init_actor_player(float x, float y, float z)
 {
@@ -89,7 +90,7 @@ void actor_player_move(actor_T* actor, float xa, float ya, float za)
     float py = actor->y + ya;
     float pz = actor->z + za;
 
-    chunk_T* chunk = chunks[(int)px / (16)][/*(int)py / (16 * 1)*/0][(int)pz / (16)];
+    chunk_T* chunk = chunks[(int)px / (NR_CHUNKS)][((int)py / (CHUNK_SIZE))][(int)pz / (NR_CHUNKS)];
 
     unsigned int is_colliding = 0;
 
@@ -127,7 +128,7 @@ void actor_player_move(actor_T* actor, float xa, float ya, float za)
     py = (actor->y + ya) - actor->height;
     pz = actor->z;
     
-    chunk = chunks[(int)px / (16)][/*(int)py / (16 * 1)*/0][(int)pz / (16)];
+    chunk = chunks[(int)px / (NR_CHUNKS)][((int)py / (CHUNK_SIZE))][(int)pz / (NR_CHUNKS)];
 
     for (int y = 0; y < CHUNK_SIZE; y++)
     {
