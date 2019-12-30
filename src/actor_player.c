@@ -1,12 +1,11 @@
 #include "include/actor_player.h"
 #include "include/chunk.h"
 #include "include/block_type.h"
+#include "include/constants.h"
 #include <coelum/physics.h>
 #include <coelum/current.h>
 #include <coelum/input.h>
 
-#define NR_CHUNKS 16
-#define NR_CHUNKS_Y 2
 
 extern keyboard_state_T* KEYBOARD_STATE;
 extern mouse_state_T* MOUSE_STATE;
@@ -21,6 +20,7 @@ actor_player_T* init_actor_player(float x, float y, float z)
         actor_player_tick, actor_player_draw, "player"
     );
     actor_player->distance = 0.0f;
+    actor_player->fly_mode = 0;
     actor->width = 1;
     actor->height = 2;
     actor->friction = 0.1f;
@@ -32,26 +32,9 @@ void actor_player_tick(actor_T* self)
 {
     actor_player_T* actor_player = (actor_player_T*) self;
     scene_T* scene = get_current_scene();
-    state_T* state = (state_T*) scene;
+    state_T* state = (state_T*) scene; 
 
-    physics_to_zero(&self->dx, self->friction);
-    physics_to_zero(&self->dy, 0.009f);
-    physics_to_zero(&self->dz, self->friction);
-
-    float wspeed = 0.1f;
-    
-    if (KEYBOARD_STATE->keys[GLFW_KEY_W])
-    {
-        self->dx += cos(glm_rad(state->camera->ry + 90)) * wspeed;
-        self->dz -= sin(glm_rad(state->camera->ry + 90)) * wspeed;
-        actor_player->distance += 0.3f;
-    }
-
-    if (KEYBOARD_STATE->keys[GLFW_KEY_S])
-    {
-        self->dx -= cos(glm_rad(state->camera->ry + 90)) * wspeed;
-        self->dz += sin(glm_rad(state->camera->ry + 90)) * wspeed;
-    }
+    float wspeed = 0.1f; 
 
     if (KEYBOARD_STATE->keys[GLFW_KEY_SPACE])
     {
@@ -60,15 +43,49 @@ void actor_player_tick(actor_T* self)
 
     state->camera->x = self->x + 0.5f;
     state->camera->z = self->z + 0.5f;
-    state->camera->y = (self->y - 0.5f) - (cos(actor_player->distance) * 0.1f);
 
     state->camera->offset_x = state->camera->x;
     state->camera->offset_y = state->camera->y;
     state->camera->offset_z = state->camera->z;
     state->camera->rx += MOUSE_STATE->dy * 0.25f;
     state->camera->ry += MOUSE_STATE->dx * 0.25f;
+    
+    if (!actor_player->fly_mode)
+    {
+        state->camera->y = (self->y - 0.5f) - (cos(actor_player->distance) * 0.1f);
 
-    actor_player_move(self, self->dx, self->dy, self->dz);
+        if (KEYBOARD_STATE->keys[GLFW_KEY_W])
+        {
+            self->dx += cos(glm_rad(state->camera->ry + 90)) * wspeed;
+            self->dz -= sin(glm_rad(state->camera->ry + 90)) * wspeed;
+            actor_player->distance += 0.3f;
+        }
+
+        if (KEYBOARD_STATE->keys[GLFW_KEY_S])
+        {
+            self->dx -= cos(glm_rad(state->camera->ry + 90)) * wspeed;
+            self->dz += sin(glm_rad(state->camera->ry + 90)) * wspeed;
+        }
+
+        actor_player_move(self, self->dx, self->dy, self->dz);
+
+        physics_to_zero(&self->dx, self->friction);
+        physics_to_zero(&self->dy, 0.009f);
+        physics_to_zero(&self->dz, self->friction);
+    }
+    else
+    {
+        state->camera->y = (self->y - 0.5f);
+
+        if (KEYBOARD_STATE->keys[GLFW_KEY_W])
+        {
+            self->dx += cos(glm_rad(state->camera->ry + 90)) * wspeed;
+            self->dz -= sin(glm_rad(state->camera->ry + 90)) * wspeed;
+            self->dy -= cos(glm_rad(state->camera->rx + 90)) * wspeed;
+            actor_player->distance += 0.3f;
+        }
+        physics_tick_actor(self);
+    }
 }
 
 void actor_player_draw(actor_T* actor)

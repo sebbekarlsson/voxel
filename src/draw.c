@@ -4,7 +4,7 @@
 
 extern unsigned int SHADER_TEXTURED_SHADED;
 
-void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, float* vertices, size_t vertices_size, int* indices, size_t indices_size, size_t nr)
+void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, float* vertices, size_t vertices_size, int* indices, size_t indices_size, size_t nr, unsigned int VBO, unsigned int EBO, mat4 model)
 {
     float width = 1.0f;
     float height = 1.0f;
@@ -50,21 +50,21 @@ void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, fl
 
     send_projection_view_state(SHADER_TEXTURED_SHADED, state->camera->projection_view); 
 
-    unsigned int VBO;
+    /*unsigned int VBO;
     glGenBuffers(1, &VBO);
 
     unsigned int EBO;
-    glGenBuffers(1, &EBO);
+    glGenBuffers(1, &EBO);*/
 
-    mat4 model =
+    /*mat4 model =
     {
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
-    };
+    };*/
 
-    glm_translate(model, (vec3){x, y, z});
+    //glm_translate(model, (vec3){x, y, z});
     send_model_state(SHADER_TEXTURED_SHADED, model);
 
     /*float VERTICES_TEXTURED[] =
@@ -146,7 +146,7 @@ void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, fl
     glDrawElements(GL_TRIANGLES, (6*nr), GL_UNSIGNED_INT, 0);
     //glDrawArrays(GL_TRIANGLES, 0, vertices_size);
 
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    //glDeleteBuffers(1, &VBO);
+    //glDeleteBuffers(1, &EBO);
     glBindVertexArray(0);
 }

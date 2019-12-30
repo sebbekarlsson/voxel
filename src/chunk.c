@@ -1,6 +1,7 @@
 #include "include/chunk.h"
 #include "include/block_type.h"
 #include "include/draw.h"
+#include "include/constants.h"
 #include <coelum/current.h>
 #include <coelum/textures.h>
 #include <coelum/draw_utils.h>
@@ -9,13 +10,13 @@
 #include <glad/glad.h>
 #include <stdlib.h>
 #include <sys/param.h>
+#include <string.h>
 
 
-#define NR_CHUNKS 16
-#define NR_CHUNKS_Y 2
 extern texture_T* TEXTURE_COBBLE;
+extern chunk_T* chunks[NR_CHUNKS][NR_CHUNKS_Y][NR_CHUNKS];
 
-chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE])
+chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE], int* decormap)
 {
     chunk_T* chunk = calloc(1, sizeof(struct CHUNK_STRUCT));
     chunk->vertices = (void*)0;
@@ -27,6 +28,22 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
     chunk->x = x;
     chunk->y = y;
     chunk->z = z;
+
+    glGenBuffers(1, &chunk->VBO);
+
+    glGenBuffers(1, &chunk->EBO);
+
+    mat4 model =
+    {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
+
+    memcpy(chunk->model, model, sizeof(model));
+    
+    glm_translate(chunk->model, (vec3){chunk->x * CHUNK_SIZE, chunk->y * CHUNK_SIZE, chunk->z * CHUNK_SIZE});
 
     int height = CHUNK_SIZE / 2;
 
@@ -45,19 +62,42 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
     {
         for (int cz = 0; cz < CHUNK_SIZE; cz++)
         {
-
-            height = MAX(0, ((CHUNK_SIZE * NR_CHUNKS_Y) * heightmap[(x*CHUNK_SIZE)+cx][(z*CHUNK_SIZE)+cz]));
+            
+            int rx = (x*CHUNK_SIZE)+cx; 
+            int rz = (z*CHUNK_SIZE)+cz; 
+            height = MAX(0,  CHUNK_SIZE * heightmap[rx][rz]);
 
             for (int cy = chunk->y * CHUNK_SIZE; cy < height; cy++)
             {
                 int placey = cy % 16;
+                int decor = decormap[(rz * (NR_CHUNKS*CHUNK_SIZE) * (NR_CHUNKS_Y*CHUNK_SIZE)) + (cy * (NR_CHUNKS*CHUNK_SIZE)) + rx];
 
-                chunk->blocks[cx][placey][cz] = cy >= 18 ? BLOCK_COBBLE : BLOCK_GRASS;
+                chunk->blocks[cx][placey][cz] = decor != BLOCK_VOID ? decor : BLOCK_GRASS;
 
                 if (placey >= CHUNK_SIZE)
                     break;
             }
         } 
+    }
+
+    for (int cx = 0; cx < CHUNK_SIZE; cx++)
+    {
+        int rx = (x*CHUNK_SIZE)+cx;
+
+        for (int cz = 0; cz < CHUNK_SIZE; cz++)
+        {
+            
+            int rz = (z*CHUNK_SIZE)+cz; 
+
+            for (int cy = 0; cy < CHUNK_SIZE; cy++)
+            {
+                int ry = (y*CHUNK_SIZE)+cy; 
+                int decor = decormap[(rz * (NR_CHUNKS*CHUNK_SIZE) * (NR_CHUNKS_Y*CHUNK_SIZE)) + (ry * (NR_CHUNKS*CHUNK_SIZE)) + rx];
+                
+                if (decor != BLOCK_VOID)
+                    chunk->blocks[cx][cy][cz] = decor;
+            }
+        }
     }
 
 
@@ -80,7 +120,10 @@ void chunk_draw(chunk_T* chunk)
         chunk->vertices_size,
         chunk->indices,
         chunk->indices_size,
-        chunk->face_count
+        chunk->face_count,
+        chunk->VBO,
+        chunk->EBO,
+        chunk->model
     );
 }
 
@@ -209,12 +252,12 @@ void chunk_generate_vertices(chunk_T* chunk)
                             continue;
                         }
                     }
-                    else if (faceid == 4 && y > 0 && y < CHUNK_SIZE - 1)
+                    else if (faceid == 5 && y >= 0 && y < CHUNK_SIZE-1) // top
                     {
-                        if (chunk->blocks[x][MAX(0, y-1)][z] != BLOCK_AIR && chunk->blocks[x][MIN(CHUNK_SIZE, y+1)][z] != BLOCK_AIR)
+                        if (chunk->blocks[x][MIN(CHUNK_SIZE-1, y+1)][z] != BLOCK_AIR)
                         {
-                            //xx += 1;
-                            //continue;
+                            xx += 1;
+                            continue;
                         }
                     }
                     else if (faceid == 3 && x > 0 && x < CHUNK_SIZE - 1)

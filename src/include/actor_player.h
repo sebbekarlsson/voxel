@@ -7,6 +7,7 @@ typedef struct ACTOR_PLAYER_STRUCT
 {
     actor_T base;
     float distance;
+    unsigned int fly_mode;
 } actor_player_T;
 
 actor_player_T* init_actor_player(float x, float y, float z);

@@ -14,18 +14,17 @@
 #include "include/chunk.h"
 #include "include/perlin.h"
 #include "include/actor_player.h"
+#include "include/constants.h"
+#include "include/block_type.h"
 
 
 extern theatre_T* THEATRE;
 extern mouse_state_T* MOUSE_STATE;
+extern volatile int SEED;
 
 texture_T* TEXTURE_COBBLE;
 
 float distance;
-
-#define NR_CHUNKS 16
-#define NR_CHUNKS_Y 2
-#define RENDER_DISTANCE 4
 
 chunk_T* chunks[NR_CHUNKS][NR_CHUNKS_Y][NR_CHUNKS];
 
@@ -133,24 +132,70 @@ scene_T* init_scene_main()
         13.0f        
     );
 
-    actor_player_T* actor_player = init_actor_player(25.0f, 32.0f, 25.0f);
+    actor_player_T* actor_player = init_actor_player(25.0f, NR_CHUNKS_Y * CHUNK_SIZE, 25.0f);
 
     dynamic_list_append(((state_T*)s)->actors, light);
 
     double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE];
+    int* decormap = calloc((NR_CHUNKS*CHUNK_SIZE) * (NR_CHUNKS_Y*CHUNK_SIZE) * (NR_CHUNKS*CHUNK_SIZE), sizeof(int));
 
     for (int x = 0; x < NR_CHUNKS*CHUNK_SIZE; x++)
     {
         for (int z = 0; z < NR_CHUNKS*CHUNK_SIZE; z++)
         {
-            heightmap[x][z] = perlin_get2d(x, z, 0.02, 4.5f);
+            double extra = perlin_get2d(x, z, 0.01f, 10.0f) + perlin_get2d(x, z, 0.009f, 20.0f) + perlin_get2d(x, z, 0.005f, 30.0f) + perlin_get2d(x, z, 0.001f, 33.0f);
+            heightmap[x][z] = 1 + perlin_get2d(x, z, 0.02, 20.5f) + extra;
+
+            //int cx = x / CHUNK_SIZE;
+            //int cz = z / CHUNK_SIZE;
+
+            int height = MAX(0, CHUNK_SIZE * heightmap[x][z]);
+
+
+            int C_W = NR_CHUNKS*CHUNK_SIZE;
+            int C_Y = NR_CHUNKS_Y*CHUNK_SIZE;
+            
+            if (height >= CHUNK_SIZE*4)
+                for (int h = height; h > height-8; h--)
+                    decormap[(z * (C_W) * (C_Y)) + ((h-1) * (C_W)) + x] = BLOCK_COBBLE;
+
+            double perlin = perlin_get2d(x, z, 0.9f, 1.0f);
+
+            // tree
+            if (perlin >= 0.98f)
+            {
+                int tree_height = random_int(4, 6);
+                int radius = random_int(3, 5);
+
+                for (int th = 0; th < tree_height; th++)
+                {
+                    decormap[(z * (C_W) * (C_Y)) + ((th + height) * (C_W)) + x] = BLOCK_LOG;
+                }
+
+                for (int ry = radius; ry > 0; ry--)
+                {
+                    for (int rx = -radius; rx < radius; rx++)
+                    {
+                        for (int rz = -radius; rz < radius; rz++)
+                        {
+                            if (vec2_distance(rx+x, rz+z, x, z) < radius)
+                            {
+                                decormap[((MAX(0, MIN(C_W-1, rz+z))) * (C_W) * (C_Y)) + ((tree_height + height-ry) * (C_W)) + (MAX(0, MIN(C_W-1,rx+x)))] = BLOCK_LEAF;
+                            }
+                        }
+                    }
+                    radius -= 1;
+                }
+            }
+
+            //printf("%d\n", height);
         }
     }
 
     for (int y = 0; y < NR_CHUNKS_Y; y++)
         for (int x = 0; x < NR_CHUNKS; x++)
             for (int z = 0; z < NR_CHUNKS; z++)
-                chunks[x][y][z] = init_chunk(x, y, z, heightmap);
+                chunks[x][y][z] = init_chunk(x, y, z, heightmap, decormap);
     
     dynamic_list_append(((state_T*)s)->actors, (actor_T*)actor_player);
 
@@ -162,6 +207,8 @@ int main(int argc, char* argv[])
     coelum_init();
 
     init_random();
+
+    SEED = random_int(16, 100000);
 
     TEXTURE_COBBLE = get_texture("res/sheet.png", GL_RGBA);
 

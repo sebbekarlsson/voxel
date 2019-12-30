@@ -2,7 +2,6 @@
 
 #include <math.h>
 
-static const int  SEED = 1985;
 
 static const unsigned char  HASH[] = {
     208,34,231,213,32,248,233,56,161,78,24,140,71,48,140,254,245,255,247,247,40,
