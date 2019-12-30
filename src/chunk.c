@@ -22,6 +22,8 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
     chunk->indices = (void*)0;
     chunk->vertices_size = 0;
     chunk->indices_size = 0;
+    chunk->block_count = 0;
+    chunk->face_count = 0;
     chunk->x = x;
     chunk->y = y;
     chunk->z = z;
@@ -78,7 +80,7 @@ void chunk_draw(chunk_T* chunk)
         chunk->vertices_size,
         chunk->indices,
         chunk->indices_size,
-        chunk->block_count
+        chunk->face_count
     );
 }
 
@@ -95,6 +97,7 @@ void chunk_generate_vertices(chunk_T* chunk)
     chunk->vertices = (void*)0;
     chunk->indices = (void*)0;
     chunk->block_count = 0;
+    chunk->face_count = 0;
 
     int icount = 0;
 
@@ -180,6 +183,8 @@ void chunk_generate_vertices(chunk_T* chunk)
                 int yy = 0;
                 int xx = 0;
                 int faceid = 0;
+                int skips[6];
+                skips[0] = 0;
 
                 for (int i = 0; i < 14*24; i++)
                 {
@@ -191,6 +196,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                         if (yy % 4 == 0)
                         {
                             faceid += 1;
+                            skips[faceid] = 0;
                         }
                     }
 
@@ -199,6 +205,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                         if (chunk->blocks[x][MAX(0, y-1)][z] != BLOCK_AIR)
                         {
                             xx += 1;
+                            skips[faceid] = 1;
                             continue;
                         }
                     }
@@ -215,6 +222,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                         if (chunk->blocks[MIN(CHUNK_SIZE, x+1)][y][z] != BLOCK_AIR)
                         {
                             xx += 1;
+                            skips[faceid] = 1;
                             continue;
                         }
                     }
@@ -223,6 +231,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                         if (chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR)
                         {
                             xx += 1;
+                            skips[faceid] = 1;
                             continue;
                         }
                     }
@@ -231,6 +240,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                         if (chunk->blocks[x][y][MIN(CHUNK_SIZE, z+1)] != BLOCK_AIR)
                         {
                             xx += 1;
+                            skips[faceid] = 1;
                             continue;
                         }
                     }
@@ -239,6 +249,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                         if (chunk->blocks[x][y][MAX(0, z-1)] != BLOCK_AIR)
                         {
                             xx += 1;
+                            skips[faceid] = 1;
                             continue;
                         }
                     }
@@ -265,7 +276,16 @@ void chunk_generate_vertices(chunk_T* chunk)
                     xx += 1;
                 }
 
-                for (int pp = 0; pp < 6; pp++)
+                int skipped = 0;
+                skipped += skips[0];
+                skipped += skips[1];
+                skipped += skips[2];
+                skipped += skips[3];
+                skipped += skips[4];
+                skipped += skips[5];
+                int nrfaces = 6 - skipped;
+
+                for (int pp = 0; pp < nrfaces; pp++)
                 {
                     chunk->indices_size += 1;
                     chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
@@ -291,9 +311,10 @@ void chunk_generate_vertices(chunk_T* chunk)
                     chunk->indices = realloc(chunk->indices, chunk->indices_size * sizeof(int));
                     chunk->indices[chunk->indices_size-1] = icount + 3;
 
-                    icount += 4; // wuut??
+                    icount += 4;
                 }
-
+                
+                chunk->face_count += nrfaces;
                 chunk->block_count += 1; // wait.... why?
             }
         }

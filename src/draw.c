@@ -143,7 +143,7 @@ void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, fl
     glUniform1i(glGetUniformLocation(SHADER_TEXTURED_SHADED, "atlas_width"), 16);
     glUniform1i(glGetUniformLocation(SHADER_TEXTURED_SHADED, "atlas_height"), 16);
 
-    glDrawElements(GL_TRIANGLES, (6*6) * (nr), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, (6*nr), GL_UNSIGNED_INT, 0);
     //glDrawArrays(GL_TRIANGLES, 0, vertices_size);
 
     glDeleteBuffers(1, &VBO);

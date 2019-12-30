@@ -13,6 +13,7 @@ typedef struct CHUNK_STRUCT
     float* vertices;
     size_t vertices_size;
     size_t block_count;
+    size_t face_count;
 
     int x;
     int y;
