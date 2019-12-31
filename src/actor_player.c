@@ -107,7 +107,11 @@ void actor_player_move(actor_T* actor, float xa, float ya, float za)
     float py = actor->y + ya;
     float pz = actor->z + za;
 
-    chunk_T* chunk = chunks[(int)px / (NR_CHUNKS)][((int)py / (CHUNK_SIZE))][(int)pz / (NR_CHUNKS)];
+    int chunk_x = (int)((px + 0.5f) / (CHUNK_SIZE));
+    int chunk_y = (int)((py) / (CHUNK_SIZE));
+    int chunk_z = (int)((pz + 0.5f) / (CHUNK_SIZE));
+
+    chunk_T* chunk = chunks[chunk_x][chunk_y][chunk_z];
 
     unsigned int is_colliding = 0;
 
