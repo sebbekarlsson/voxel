@@ -25,10 +25,14 @@ typedef struct CHUNK_STRUCT
     unsigned int VBO;
     unsigned int EBO;
 
+    unsigned int selected;
+
     mat4 model;
 } chunk_T;
 
 chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE], int* decormap);
+
+void chunk_tick(chunk_T* chunk);
 
 void chunk_draw(chunk_T* chunk);
 

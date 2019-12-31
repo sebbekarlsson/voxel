@@ -28,6 +28,7 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
     chunk->x = x;
     chunk->y = y;
     chunk->z = z;
+    chunk->selected = 0;
 
     glGenBuffers(1, &chunk->VBO);
 
@@ -106,6 +107,10 @@ chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][
     return chunk;
 }
 
+void chunk_tick(chunk_T* chunk)
+{
+}
+
 void chunk_draw(chunk_T* chunk)
 {
     state_T* state = get_current_state();
@@ -125,6 +130,19 @@ void chunk_draw(chunk_T* chunk)
         chunk->EBO,
         chunk->model
     );
+
+    if (chunk->selected)
+        draw_3D_axis(
+            chunk->x * CHUNK_SIZE,
+            (chunk->y * CHUNK_SIZE),
+            chunk->z * CHUNK_SIZE,
+            CHUNK_SIZE,
+            CHUNK_SIZE,
+            CHUNK_SIZE,
+            state
+        );
+
+    chunk->selected = 0;
 }
 
 void chunk_generate_vertices(chunk_T* chunk)

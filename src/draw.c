@@ -6,12 +6,12 @@ extern unsigned int SHADER_TEXTURED_SHADED;
 
 void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, float* vertices, size_t vertices_size, int* indices, size_t indices_size, size_t nr, unsigned int VBO, unsigned int EBO, mat4 model)
 {
-    float width = 1.0f;
+    /*kfloat width = 1.0f;
     float height = 1.0f;
     float r = 255.0f;
     float g = 255.0f;
     float b = 255.0f;
-    float a = 1.0f;
+    float a = 1.0f;*/
 
     /*int INDICES_DEFAULT [] =
     {
@@ -106,7 +106,7 @@ void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, fl
         width,   height,    0.0f,  r / 255.0f, g / 255.0f, b / 255.0f, a,   0.0f, 1.0f,   0.0f, -1.0f, 0.0f,    // top left
     };*/
     
-    float* VERTICES_TEXTURED = vertices; 
+    //float* VERTICES_TEXTURED = vertices; 
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //glBufferData(GL_ARRAY_BUFFER, sizeof(VERTICES_TEXTURED), VERTICES_TEXTURED, GL_STATIC_DRAW);

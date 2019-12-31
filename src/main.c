@@ -104,7 +104,28 @@ void custom_scene_draw(scene_T* scene)
 
 void custom_scene_tick(scene_T* scene)
 {
-    state_T* state = (state_T*) scene; 
+    state_T* state = (state_T*) scene;
+
+    for (int y = 0; y < NR_CHUNKS_Y; y++)
+    {
+        for (int x = 0; x < NR_CHUNKS; x++)
+        {
+            for (int z = 0; z < NR_CHUNKS; z++)
+            {
+                int cx = (x * CHUNK_SIZE) + (CHUNK_SIZE / 2);
+                int cz = (z * CHUNK_SIZE) + (CHUNK_SIZE / 2);
+                int cy = (y * CHUNK_SIZE) + (CHUNK_SIZE / 2);
+
+                if (MAX(cy, state->camera->y) - MIN(cy, state->camera->y) > CHUNK_SIZE*2)
+                    continue;
+                
+                if (vec2_distance(cx, cz, state->camera->x, state->camera->z) > (CHUNK_SIZE * RENDER_DISTANCE))
+                    continue;
+
+                chunk_tick(chunks[x][y][z]); 
+            }
+        }
+    }
 }
 
 scene_T* init_scene_main()
