@@ -119,20 +119,36 @@ void scene_world_draw(scene_T* scene)
         {
             for (int z = 0; z < NR_CHUNKS; z++)
             {
-                int cx = (x * CHUNK_SIZE) + (CHUNK_SIZE / 2);
-                int cz = (z * CHUNK_SIZE) + (CHUNK_SIZE / 2);
-                int cy = (y * CHUNK_SIZE) + (CHUNK_SIZE / 2);
+                int cx = x * CHUNK_SIZE;
+                int cy = y * CHUNK_SIZE;
+                int cz = z * CHUNK_SIZE;
 
-                if (MAX(cy, state->camera->y) - MIN(cy, state->camera->y) > CHUNK_SIZE*2)
+                int cxc = cx + (CHUNK_SIZE / 2);
+                int cyc = cy + (CHUNK_SIZE / 2);
+                int czc = cz + (CHUNK_SIZE / 2);
+
+                if (MAX(cyc, state->camera->y) - MIN(cyc, state->camera->y) > CHUNK_SIZE*2)
                     continue;
                 
-                if (vec2_distance(cx, cz, state->camera->x, state->camera->z) > (CHUNK_SIZE * RENDER_DISTANCE))
+                if (vec2_distance(cxc, czc, state->camera->x, state->camera->z) > (CHUNK_SIZE * RENDER_DISTANCE))
                     continue;
 
-                chunk_draw(world->chunks[x][y][z]); 
+                vec3 box[2] = {{cx, cy, cz}, {cx + CHUNK_SIZE, cy + CHUNK_SIZE, cz + CHUNK_SIZE}};
+                if (glm_aabb_frustum(box, state->camera->frustum->planes))
+                    chunk_draw(world->chunks[x][y][z]); 
             }
         }
     }
+
+    draw_3D_axis(
+            state->camera->frustum->center[0],
+            state->camera->frustum->center[1],
+            state->camera->frustum->center[2],
+            128,
+            128,
+            128,
+            state
+        );
 
     camera_unbind(state->camera);
 
