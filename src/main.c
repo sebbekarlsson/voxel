@@ -16,7 +16,9 @@ extern mouse_state_T* MOUSE_STATE;
 extern volatile int SEED;
 extern theatre_T* THEATRE;
 
-texture_T* TEXTURE_COBBLE;
+texture_T* TEXTURE_ATLAS;
+
+sprite_T* SPRITE_CROSSHAIR;
 
 
 int main(int argc, char* argv[])
@@ -27,7 +29,9 @@ int main(int argc, char* argv[])
 
     SEED = random_int(16, 100000);
 
-    TEXTURE_COBBLE = get_texture("res/sheet.png", GL_RGBA);
+    TEXTURE_ATLAS = get_texture("res/sheet.png", GL_RGBA);
+
+    SPRITE_CROSSHAIR = init_sprite_from_file("res/crosshair.png", GL_RGBA, 0.0f, 32, 32);
 
     MOUSE_STATE->input_mode = GLFW_CURSOR_DISABLED;
 

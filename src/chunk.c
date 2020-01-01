@@ -13,7 +13,7 @@
 #include <string.h>
 
 
-extern texture_T* TEXTURE_COBBLE;
+extern texture_T* TEXTURE_ATLAS;
 extern chunk_T* chunks[NR_CHUNKS][NR_CHUNKS_Y][NR_CHUNKS];
 
 chunk_T* init_chunk(int x, int y, int z, double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE], int* decormap)
@@ -117,7 +117,7 @@ void chunk_draw(chunk_T* chunk)
 
     draw_cube(
         state,
-        TEXTURE_COBBLE,
+        TEXTURE_ATLAS,
         chunk->x * CHUNK_SIZE,
         chunk->y * CHUNK_SIZE,
         chunk->z * CHUNK_SIZE,

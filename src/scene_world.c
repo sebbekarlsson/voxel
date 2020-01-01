@@ -9,7 +9,10 @@
 #include <coelum/constants.h>
 #include <coelum/draw_utils.h>
 #include <string.h>
+#include <glad/glad.h>
 
+
+extern sprite_T* SPRITE_CROSSHAIR;
 
 scene_world_T* init_scene_world()
 {
@@ -150,6 +153,17 @@ void scene_world_draw(scene_T* scene)
         world->GUI_state 
     );
     free(coords_text);
+
+    // TODO invert blend with background
+    draw_positioned_sprite(
+        SPRITE_CROSSHAIR,
+        (RES_WIDTH / 2) - (SPRITE_CROSSHAIR->width / 2),
+        (RES_HEIGHT / 2) - (SPRITE_CROSSHAIR->height / 2),
+        0,
+        0,
+        0,
+        world->GUI_state
+    );
 }
 
 void scene_world_tick(scene_T* scene)
