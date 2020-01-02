@@ -275,10 +275,11 @@ void chunk_generate_vertices(chunk_T* chunk)
                         if (chunk->blocks[x][MIN(CHUNK_SIZE-1, y+1)][z] != BLOCK_AIR)
                         {
                             xx += 1;
+                            skips[faceid] = 1;
                             continue;
                         }
                     }
-                    else if (faceid == 3 && x > 0 && x < CHUNK_SIZE - 1)
+                    else if (faceid == 3 && x >= 0 && x < CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[MIN(CHUNK_SIZE, x+1)][y][z] != BLOCK_AIR)
                         {
@@ -287,7 +288,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                             continue;
                         }
                     }
-                    else if (faceid == 2 && x > 0 && x < CHUNK_SIZE - 1)
+                    else if (faceid == 2 && x > 0 && x <= CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[MAX(0, x-1)][y][z] != BLOCK_AIR)
                         {
@@ -296,7 +297,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                             continue;
                         }
                     }
-                    else if (faceid == 1 && z > 0 && z < CHUNK_SIZE - 1)
+                    else if (faceid == 1 && z >= 0 && z < CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[x][y][MIN(CHUNK_SIZE, z+1)] != BLOCK_AIR)
                         {
@@ -305,7 +306,7 @@ void chunk_generate_vertices(chunk_T* chunk)
                             continue;
                         }
                     }
-                    else if (faceid == 0 && z > 0 && z < CHUNK_SIZE - 1)
+                    else if (faceid == 0 && z > 0 && z <= CHUNK_SIZE - 1)
                     {
                         if (chunk->blocks[x][y][MAX(0, z-1)] != BLOCK_AIR)
                         {
@@ -315,7 +316,6 @@ void chunk_generate_vertices(chunk_T* chunk)
                         }
                     }
 
-                    
                     chunk->vertices_size += 1;
 
                     if (chunk->vertices == (void*)0)
