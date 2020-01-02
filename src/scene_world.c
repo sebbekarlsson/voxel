@@ -133,8 +133,7 @@ void scene_world_draw(scene_T* scene)
                 if (vec2_distance(cxc, czc, state->camera->x, state->camera->z) > (CHUNK_SIZE * RENDER_DISTANCE))
                     continue;
 
-                vec3 box[2] = {{cx, cy, cz}, {cx + CHUNK_SIZE, cy + CHUNK_SIZE, cz + CHUNK_SIZE}};
-                if (glm_aabb_frustum(box, state->camera->frustum->planes))
+                if (frustum_is_box_in_view(state->camera->frustum, cx, cy, cz, cx + CHUNK_SIZE, cy + CHUNK_SIZE, cz + CHUNK_SIZE))
                     chunk_draw(world->chunks[x][y][z]); 
             }
         }
