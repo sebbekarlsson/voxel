@@ -21,11 +21,11 @@ actor_player_T* init_actor_player(float x, float y, float z, scene_world_T* worl
             );
     actor_player->distance = 0.0f;
     actor_player->fly_mode = 1;
-    actor_player->walking_speed = 0.1f;
+    actor_player->walking_speed = 0.2f;
     actor_player->world = world;
     actor->width = 1;
     actor->height = 2;
-    actor->friction = 0.1f;
+    actor->friction = 0.95f;
 
     return actor_player;
 }
@@ -47,6 +47,8 @@ void actor_player_tick(actor_T* self)
 
     // head bobbing 
     state->camera->y = (self->y - 0.5f) - (cos(actor_player->distance) * 0.1f);
+    
+    physics_tick_actor(self);
 
     if (KEYBOARD_STATE->keys[GLFW_KEY_W])
     {
@@ -56,7 +58,6 @@ void actor_player_tick(actor_T* self)
         actor_player->distance += 0.3f;
     }
 
-    physics_tick_actor(self);
     
     int chunk_x = (self->x + 0.5f) / CHUNK_SIZE;
     int chunk_y = self->y / CHUNK_SIZE;

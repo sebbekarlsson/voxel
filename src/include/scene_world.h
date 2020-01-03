@@ -2,6 +2,7 @@
 #define VOXEL_SCENE_WORLD_H
 #include <coelum/scene.h>
 #include "chunk.h"
+#include <coelum/actor_light.h>
 
 
 typedef struct SCENE_WORLD_STRUCT
@@ -10,6 +11,7 @@ typedef struct SCENE_WORLD_STRUCT
     chunk_T* chunks[NR_CHUNKS][NR_CHUNKS_Y][NR_CHUNKS];
     state_T* GUI_state;
     struct ACTOR_PLAYER_STRUCT* player;
+    actor_light_T* light;
 } scene_world_T;
 
 scene_world_T* init_scene_world();

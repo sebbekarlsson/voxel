@@ -1,4 +1,5 @@
 #include "include/draw.h"
+#include "include/chunk.h"
 #include <coelum/draw_utils.h>
 
 
@@ -138,7 +139,7 @@ void draw_cube(state_T* state, texture_T* texture, float x, float y, float z, fl
     glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(13 * sizeof(float)));
     glEnableVertexAttribArray(5);
 
-    glUniform3fv(glGetUniformLocation(SHADER_TEXTURED_SHADED, "world_pos"), 1, (float[]){ x, y, z });
+    glUniform3fv(glGetUniformLocation(SHADER_TEXTURED_SHADED, "world_pos"), 1, (float[]){ x + CHUNK_SIZE / 2, y + CHUNK_SIZE / 2, z + CHUNK_SIZE / 2 });
     
     glUniform1i(glGetUniformLocation(SHADER_TEXTURED_SHADED, "atlas_width"), 16);
     glUniform1i(glGetUniformLocation(SHADER_TEXTURED_SHADED, "atlas_height"), 16);

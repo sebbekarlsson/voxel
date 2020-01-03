@@ -5,7 +5,6 @@
 #include "include/actor_player.h"
 #include <sys/param.h>
 #include <coelum/utils.h>
-#include <coelum/actor_light.h>
 #include <coelum/constants.h>
 #include <coelum/draw_utils.h>
 #include <string.h>
@@ -35,14 +34,14 @@ scene_world_T* init_scene_world()
     state->camera->projection_view->fov = 90.0f;
     projection_view_recalculate_projection(state->camera->projection_view);
 
-    actor_light_T* light = init_actor_light(
+    world->light = init_actor_light(
         0.0f, 8.0f, 2.0f,
         13.0f        
     );
 
     world->player = init_actor_player(25.0f, NR_CHUNKS_Y * CHUNK_SIZE, 25.0f, world);
 
-    dynamic_list_append(((state_T*)s)->actors, light);
+    dynamic_list_append(((state_T*)s)->actors, world->light);
 
     double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE];
     int* decormap = calloc((NR_CHUNKS*CHUNK_SIZE) * (NR_CHUNKS_Y*CHUNK_SIZE) * (NR_CHUNKS*CHUNK_SIZE), sizeof(int));
@@ -206,4 +205,8 @@ void scene_world_tick(scene_T* scene)
             }
         }
     }
+
+    ((actor_T*)world->light)->x = ((actor_T*)world->player)->x + 0.5f;
+    ((actor_T*)world->light)->y = ((actor_T*)world->player)->y + 1;
+    ((actor_T*)world->light)->z = ((actor_T*)world->player)->z + 0.5f;
 }

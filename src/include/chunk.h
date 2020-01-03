@@ -10,7 +10,7 @@
 
 typedef struct CHUNK_STRUCT
 {
-    int blocks[16][16][16];
+    int blocks[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
     int* indices;
     size_t indices_size;
     float* vertices;
