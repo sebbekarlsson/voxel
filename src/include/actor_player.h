@@ -8,7 +8,9 @@ typedef struct ACTOR_PLAYER_STRUCT
 {
     actor_T base;
     float distance;
+    unsigned int collision;
     unsigned int fly_mode;
+    float flying_speed;
     float walking_speed;
     scene_world_T* world;
 } actor_player_T;

@@ -39,7 +39,7 @@ scene_world_T* init_scene_world()
         13.0f        
     );
 
-    world->player = init_actor_player(25.0f, NR_CHUNKS_Y * CHUNK_SIZE, 25.0f, world);
+    world->player = init_actor_player(25.0f, (NR_CHUNKS_Y * CHUNK_SIZE), 25.0f, world);
 
     dynamic_list_append(((state_T*)s)->actors, world->light);
 
