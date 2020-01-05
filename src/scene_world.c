@@ -117,9 +117,12 @@ scene_world_T* init_scene_world()
             int wx = x * 4;
             int wz = z * 4;
             float wh = 0.2f;
+            //int C_W = NR_CHUNKS*CHUNK_SIZE;
+            //int C_Y = NR_CHUNKS_Y*CHUNK_SIZE;
 
             if (type == MAZE_STRUCTURE_HORIZONTAL)
             {
+                //decormap[((MAX(0, MIN(C_W-1, wz))) * (C_W) * (C_Y)) + ((16) * (C_W)) + (MAX(0, MIN(C_W-1,wx)))] = BLOCK_LOG;
                 heightmap[wx][wz] += wh;
                 heightmap[wx+1][wz] += wh;
                 heightmap[wx+2][wz] += wh;
