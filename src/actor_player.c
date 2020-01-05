@@ -110,7 +110,7 @@ void actor_player_tick(actor_T* self)
             actor_player->distance += 0.3f;
         }
         
-        if (!collides(self, 0, self->dy, 0, 0, -self->height, 0))
+        if (!collides(self, self->dx, self->dy, self->dz, 0, -self->height, 0) && !collides(self, self->dx, self->dy, self->dz, 0, -(self->height-1), 0))
         {
             self->dy -= 0.02f;
         }
@@ -126,7 +126,7 @@ void actor_player_tick(actor_T* self)
             }
         }
         
-        if (!collides(self, self->dx, 0, 0, 0, 0, 0) && !collides(self, self->dx, 0, 0, 0, -1, 0))
+        if (!collides(self, self->dx, self->dy, 0, 0, 0, 0) && !collides(self, self->dx, self->dy, 0, 0, -1, 0))
         {
             self->x += self->dx;
         }
@@ -135,7 +135,7 @@ void actor_player_tick(actor_T* self)
             self->dx = 0;
         }
 
-        if (!collides(self, 0, self->dy, 0, 0, 0, 0))
+        if (!collides(self, 0, self->dy, 0, 0, 0, 0) && !collides(self, 0, self->dy, 0, 0, -1, 0))
         {
             self->y += self->dy;
         }
@@ -144,7 +144,7 @@ void actor_player_tick(actor_T* self)
             self->dy = 0;
         }
 
-        if (!collides(self, 0, 0, self->dz, 0, 0, 0) && !collides(self, 0, 0, self->dz, 0, -1, 0))
+        if (!collides(self, 0, self->dy, self->dz, 0, 0, 0) && !collides(self, 0, self->dy, self->dz, 0, -1, 0))
         {
             self->z += self->dz;
         }

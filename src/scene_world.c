@@ -9,6 +9,8 @@
 #include <coelum/draw_utils.h>
 #include <string.h>
 #include <glad/glad.h>
+#include <maze/maze.h>
+#include <maze/structures.h>
 
 
 extern sprite_T* SPRITE_CROSSHAIR;
@@ -43,13 +45,22 @@ scene_world_T* init_scene_world()
 
     dynamic_list_append(((state_T*)s)->actors, world->light);
 
-    double heightmap[NR_CHUNKS*CHUNK_SIZE][NR_CHUNKS*CHUNK_SIZE];
-    int* decormap = calloc((NR_CHUNKS*CHUNK_SIZE) * (NR_CHUNKS_Y*CHUNK_SIZE) * (NR_CHUNKS*CHUNK_SIZE), sizeof(int));
+    int world_width = NR_CHUNKS*CHUNK_SIZE;
+    int world_height = world_width;
+
+    double heightmap[world_width][world_height];
+    int* decormap = calloc((NR_CHUNKS*CHUNK_SIZE) * (NR_CHUNKS_Y*CHUNK_SIZE) * (NR_CHUNKS*CHUNK_SIZE), sizeof(int)); 
 
     for (int x = 0; x < NR_CHUNKS*CHUNK_SIZE; x++)
     {
         for (int z = 0; z < NR_CHUNKS*CHUNK_SIZE; z++)
         {
+            
+            heightmap[x][z] = 0.2f;
+
+            continue;
+
+
             double extra = perlin_get2d(x, z, 0.01f, 10.0f) + perlin_get2d(x, z, 0.009f, 20.0f) + perlin_get2d(x, z, 0.005f, 30.0f) + perlin_get2d(x, z, 0.001f, 33.0f);
             heightmap[x][z] = 1 + perlin_get2d(x, z, 0.02, 20.5f) + extra;
 
@@ -90,6 +101,47 @@ scene_world_T* init_scene_world()
                     }
                     radius -= 1;
                 }
+            }
+        }
+    }
+
+    int structure_size = 4;
+    maze_T* maze = init_maze(structure_size * NR_CHUNKS, structure_size * NR_CHUNKS);
+
+    for (int x = 0; x < maze->width; x++)
+    {
+        for (int z = 0; z < maze->height; z++)
+        {
+            int type = maze_get_location_data(maze, x, z);
+
+            int wx = x * 4;
+            int wz = z * 4;
+            float wh = 0.2f;
+
+            if (type == MAZE_STRUCTURE_HORIZONTAL)
+            {
+                heightmap[wx][wz] += wh;
+                heightmap[wx+1][wz] += wh;
+                heightmap[wx+2][wz] += wh;
+                heightmap[wx+3][wz] += wh;
+
+                heightmap[wx][wz+1] += wh;
+                heightmap[wx+1][wz+1] += wh;
+                heightmap[wx+2][wz+1] += wh;
+                heightmap[wx+3][wz+1] += wh;
+            }
+
+            if (type == MAZE_STRUCTURE_VERTICAL)
+            {
+                heightmap[wx][wz] += wh;
+                heightmap[wx][wz+1] += wh;
+                heightmap[wx][wz+2] += wh;
+                heightmap[wx][wz+3] += wh;
+
+                heightmap[wx+1][wz] += wh;
+                heightmap[wx+1][wz+1] += wh;
+                heightmap[wx+1][wz+2] += wh;
+                heightmap[wx+1][wz+3] += wh;
             }
         }
     }
