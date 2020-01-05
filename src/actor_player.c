@@ -62,31 +62,7 @@ static unsigned int collides(actor_T* self, float dx, float dy, float dz, float 
     int ipy = (int)py;
     int ipz = (int)pz;
 
-    int w = 1;
-
-    if (player->world->chunks[chunk_x][chunk_y][chunk_z]->blocks[ipx % 16][ipy % 16][ipz % 16] != BLOCK_AIR)
-        return 1;
-    else
-        return 0;
-
-    /*if (chunk->blocks[MAX(0, MIN(CHUNK_SIZE-1, x))][MAX(0, MIN(CHUNK_SIZE-1,y))][MAX(0, MIN(CHUNK_SIZE-1,z))] == BLOCK_AIR)
-        return 1;
-    else
-        return 0;*/
-
-    /*if (px + self->width >= bx && px <= bx + w)
-    {
-        if (pz + self->width >= bz && pz <= bz + w)
-        {
-            if (py + self->height >= by && py <= by + w)
-            {
-                player->collision = 1;
-                break;
-            }
-        }
-    }
-
-    return player->collision;*/ 
+    return player->world->chunks[chunk_x][chunk_y][chunk_z]->blocks[ipx % 16][ipy % 16][ipz % 16] != BLOCK_AIR;
 }
 
 void actor_player_tick(actor_T* self)
@@ -177,14 +153,6 @@ void actor_player_tick(actor_T* self)
             self->dz = 0;
         }
     }
-
-    int chunk_x = (self->x + 0.5f) / CHUNK_SIZE;
-    int chunk_y = self->y / CHUNK_SIZE;
-    int chunk_z = (self->z + 0.5f) / CHUNK_SIZE;
-
-    chunk_T* chunk = actor_player->world->chunks[chunk_x][chunk_y][chunk_z];
-
-    chunk->selected = 1;
 }
 
 void actor_player_draw(actor_T* actor)
