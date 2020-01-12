@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 
     SPRITE_CROSSHAIR = init_sprite_from_file("res/crosshair.png", GL_RGBA, 0.0f, 32, 32);
 
-    MOUSE_STATE->input_mode = GLFW_CURSOR_DISABLED;
+    //MOUSE_STATE->input_mode = GLFW_CURSOR_DISABLED;
 
     scene_manager_register_scene(THEATRE->scene_manager, (scene_T*) init_scene_world());
 

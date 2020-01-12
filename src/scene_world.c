@@ -56,9 +56,9 @@ scene_world_T* init_scene_world()
         for (int z = 0; z < NR_CHUNKS*CHUNK_SIZE; z++)
         {
             
-            heightmap[x][z] = 0.2f;
+            //heightmap[x][z] = 0.2f;
 
-            continue;
+            //continue;
 
 
             double extra = perlin_get2d(x, z, 0.01f, 10.0f) + perlin_get2d(x, z, 0.009f, 20.0f) + perlin_get2d(x, z, 0.005f, 30.0f) + perlin_get2d(x, z, 0.001f, 33.0f);
@@ -105,7 +105,7 @@ scene_world_T* init_scene_world()
         }
     }
 
-    int structure_size = 4;
+    /*int structure_size = 4;
     maze_T* maze = init_maze(structure_size * NR_CHUNKS, structure_size * NR_CHUNKS);
 
     for (int x = 0; x < maze->width; x++)
@@ -147,7 +147,7 @@ scene_world_T* init_scene_world()
                 heightmap[wx+1][wz+3] += wh;
             }
         }
-    }
+    }*/
 
     for (int y = 0; y < NR_CHUNKS_Y; y++)
         for (int x = 0; x < NR_CHUNKS; x++)
